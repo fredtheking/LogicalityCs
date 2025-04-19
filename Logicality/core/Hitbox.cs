@@ -14,6 +14,9 @@ public class Hitbox : IScript
   public readonly bool[] Down = [false, false, false];
   public readonly bool[] Hold = [false, false, false];
   public readonly bool[] Drag = [false, false, false];
+
+  public Hitbox() { }
+  public Hitbox(Rectangle rect) => Rect = rect;
   
   public void Init()
   {

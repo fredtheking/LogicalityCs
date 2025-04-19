@@ -8,35 +8,38 @@ namespace Logicality.scenes;
 public class MainScene : Scene
 {
   public override string Name => nameof(MainScene);
+  public LogicBoxSelector selector = new();
   public List<LogicBox> boxes = [];
-  
+  public static List<LogicBox> newBoxes = [];
   
   public override void Init()
   {
-    boxes.Add(new LogicBox(LogicStates.Wire, new Vector2(100, 100)));
-    boxes.Add(new LogicBox(LogicStates.Not, new Vector2(100, 300)));
-    boxes.Add(new LogicBox(LogicStates.And, new Vector2(300, 100)));
-    boxes.Add(new LogicBox(LogicStates.Or, new Vector2(300, 300)));
-    boxes.Add(new LogicBox(LogicStates.Xor, new Vector2(300, 500)));
-    
     foreach (LogicBox box in boxes)
       box.Init();
+    selector.Init();
   }
   public override void Enter()
   {
     foreach (LogicBox box in boxes)
       box.Enter();
+    selector.Enter();
   }
   public override void Update()
   {
+    selector.Update();
+    if (IsMouseButtonPressed(MouseButton.Middle))
+      newBoxes.Add(new LogicBox(newBoxes, selector.Pick(), GetMousePosition()));
+
     foreach (LogicBox box in boxes)
       box.Update();
+    boxes = new List<LogicBox>(newBoxes);
   }
   public override void Render()
   {
     DrawSceneGrid();
-    foreach (LogicBox box in boxes)
+    foreach (LogicBox box in newBoxes)
       box.Render();
+    selector.Render();
   }
 
 

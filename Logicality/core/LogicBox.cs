@@ -1,4 +1,5 @@
 using System.Numerics;
+using Logicality.scenes;
 using Logicality.utils.interfaces;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
@@ -7,6 +8,7 @@ namespace Logicality.core;
 
 public class LogicBox : IScript
 {
+  public List<LogicBox> Boxes;
   public Rectangle Rect;
   public Rectangle DragRectOffset;
   public Vector2 CenterOffset;
@@ -26,8 +28,9 @@ public class LogicBox : IScript
   public Color Color { get; private set; }
   public bool Selected { get; private set; }
   
-  public LogicBox(LogicStates state, Vector2 position)
+  public LogicBox(List<LogicBox> boxes, LogicStates state, Vector2 position)
   {
+    Boxes = boxes;
     State = state;
     Rect = new Rectangle(position.X, position.Y, 120, 100);
     Color = state switch
@@ -74,8 +77,12 @@ public class LogicBox : IScript
     Hitbox.Update();
 
     Selected = Hitbox.Drag[(int)MouseButton.Left];
-    if (Selected) 
+    if (Selected)
+    {
       Rect.Position += GetMouseDelta();
+      Boxes.Remove(this);
+      Boxes.Add(this);
+    }
     
     Hitbox.Rect = new(Rect.Position + DragRectOffset.Position, DragRectOffset.Size);
   }

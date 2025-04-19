@@ -6,5 +6,7 @@ public enum LogicStates
   Not,
   And,
   Or,
-  Xor
+  Xor,
+  Generator,
+  Receiver
 }
