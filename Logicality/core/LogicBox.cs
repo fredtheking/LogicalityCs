@@ -14,14 +14,9 @@ public class LogicBox : IScript
   public Vector2 CenterOffset;
   public Vector2 TextOffset;
 
-  public bool InputOneBool;
-  public Vector2 InputOneOffset;
-  
-  public bool InputTwoBool;
-  public Vector2 InputTwoOffset;
-  
-  public bool OutputBool;
-  public Vector2 OutputOffset;
+  public Receiver? Input1;
+  public Receiver? Input2;
+  public Receiver? Output;
   
   public LogicStates State { get; private set; }
   public Hitbox Hitbox { get; private set; }
@@ -40,6 +35,8 @@ public class LogicBox : IScript
       LogicStates.And => Color.Lime,
       LogicStates.Or => Color.Yellow,
       LogicStates.Xor => Color.Orange,
+      LogicStates.Battery => Color.DarkPurple,
+      LogicStates.Receive => Color.DarkBlue,
       _ => Color.Blank
     };
     Hitbox = new();
@@ -48,23 +45,28 @@ public class LogicBox : IScript
     TextOffset = CenterText();
     DragRectOffset = new Rectangle(CenterOffset - new Vector2(50, 20), new Vector2(100, 40));
     
-    InputOneOffset = new Vector2(30, CenterOffset.Y + 34);
-    InputTwoOffset = new Vector2(30, CenterOffset.Y + 48);
-    
-    OutputOffset = new Vector2(Rect.Width - 30, CenterOffset.Y + 41);
-    if (State is LogicStates.Wire or LogicStates.Not)
-      InputOneOffset.Y = OutputOffset.Y;
+    if (State is not LogicStates.Battery)
+      Input1 = new Receiver(this, new Vector2(30, CenterOffset.Y + 34), false);
+    if (State is LogicStates.And or LogicStates.Or or LogicStates.Xor)
+      Input2 = new Receiver(this, new Vector2(30, CenterOffset.Y + 48), false);
+    if (State is not LogicStates.Receive)
+      Output = new Receiver(this, new Vector2(Rect.Width - 30, CenterOffset.Y + 41), true);
+
+    if (Input1 is not null && State is LogicStates.Wire or LogicStates.Not or LogicStates.Receive)
+      Input1.Offset.Y = Output?.Offset.Y ?? CenterOffset.Y + 41;
   }
 
   private Vector2 CenterText()
   {
-    Vector2 size = MeasureTextEx(GetFontDefault(), State.ToString().ToUpper(), 20, 2);
+    Vector2 size = MeasureTextEx(GetFontDefault(), State.ToString().ToUpper(), 18, 2);
     return CenterOffset - size / 2;
   }
   
   public void Init()
   {
     Hitbox.Init();
+    if (State is LogicStates.Battery)
+      Output!.State = true;
   }
 
   public void Enter()
@@ -101,20 +103,26 @@ public class LogicBox : IScript
     else
       DrawRectangleLinesEx(selectionRect, 1, Color.Black);
     
-    DrawCircleV(Rect.Position + InputOneOffset, 5, InputOneBool ? Color.White : new Color(0, 0, 0, 100));
-    DrawCircleLinesV(Rect.Position + InputOneOffset, 5, Color.Black);
-    DrawLineV(Rect.Position + InputOneOffset - Vector2.UnitX * 30, Rect.Position + InputOneOffset - Vector2.UnitX * 5, Color.Black);
-    if (State is LogicStates.And or LogicStates.Or or LogicStates.Xor)
+    if (Input1 is not null)
     {
-      DrawCircleV(Rect.Position + InputTwoOffset, 5, InputTwoBool ? Color.White : new Color(0, 0, 0, 100));
-      DrawCircleLinesV(Rect.Position + InputTwoOffset, 5, Color.Black);
-      DrawLineV(Rect.Position + InputTwoOffset - Vector2.UnitX * 30, Rect.Position + InputTwoOffset - Vector2.UnitX * 5, Color.Black);
+      DrawCircleV(Rect.Position + Input1.Offset, 5, Input1.State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
+      DrawCircleLinesV(Rect.Position + Input1.Offset, 5, Color.Black);
+      DrawLineV(Rect.Position + Input1.Offset - Vector2.UnitX * 30, Rect.Position + Input1.Offset - Vector2.UnitX * 5, Color.Black);
     }
-    DrawCircleV(Rect.Position + OutputOffset, 5, OutputBool ? Color.White : new Color(0, 0, 0, 100));
-    DrawCircleLinesV(Rect.Position + OutputOffset, 5, Color.Black);
-    DrawLineV(Rect.Position + OutputOffset + Vector2.UnitX * 30, Rect.Position + OutputOffset + Vector2.UnitX * 5, Color.Black);
+    if (Input2 is not null)
+    {
+      DrawCircleV(Rect.Position + Input2.Offset, 5, Input2.State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
+      DrawCircleLinesV(Rect.Position + Input2.Offset, 5, Color.Black);
+      DrawLineV(Rect.Position + Input2.Offset - Vector2.UnitX * 30, Rect.Position + Input2.Offset - Vector2.UnitX * 5, Color.Black);
+    }
+    if (Output is not null)
+    {
+      DrawCircleV(Rect.Position + Output.Offset, 5, Output.State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
+      DrawCircleLinesV(Rect.Position + Output.Offset, 5, Color.Black);
+      DrawLineV(Rect.Position + Output.Offset + Vector2.UnitX * 30, Rect.Position + Output.Offset + Vector2.UnitX * 5, Color.Black);
+    }
     
-    DrawTextEx(GetFontDefault(), State.ToString().ToUpper(), Rect.Position + TextOffset, 20, 2, Color.Black);
+    DrawTextEx(GetFontDefault(), State.ToString().ToUpper(), Rect.Position + TextOffset, 18, 2, Color.Black);
     
     Hitbox.Render();
   }

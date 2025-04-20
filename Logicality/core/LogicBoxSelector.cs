@@ -6,14 +6,14 @@ namespace Logicality.core;
 
 public class LogicBoxSelector : IScript
 {
-  private string[] Names = ["W", "N", "A", "O", "X", "G", "R"];
+  private string[] Names = ["W", "N", "A", "O", "X", "B", "R"];
   List<SelectorOption> Options = [];
   public int Selected;
 
   public void Init()
   {
     for (int i = 0; i < Names.Length; i++) 
-      Options.Add(new SelectorOption(new(30 * i + 300, 0, 30, 30), Names[i]));
+      Options.Add(new SelectorOption(new(33 * i + 300, 0, 30, 30), Names[i]));
     Options[0].Selected = true;
   }
   public void Enter() { }
@@ -33,10 +33,8 @@ public class LogicBoxSelector : IScript
   }
   public void Render()
   {
-    foreach (SelectorOption option in Options)
-    {
+    foreach (SelectorOption option in Options) 
       option.Render();
-    }
   }
 
 
@@ -49,8 +47,8 @@ public class LogicBoxSelector : IScript
       "A" => LogicStates.And,
       "O" => LogicStates.Or,
       "X" => LogicStates.Xor,
-      "G" => LogicStates.Generator,
-      "R" => LogicStates.Receiver,
+      "G" => LogicStates.Battery,
+      "R" => LogicStates.Receive,
       _ => LogicStates.Wire
     };
   }

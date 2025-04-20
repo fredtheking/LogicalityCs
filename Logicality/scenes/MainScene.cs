@@ -14,7 +14,15 @@ public class MainScene : Scene
   
   public override void Init()
   {
-    foreach (LogicBox box in boxes)
+    newBoxes.Add(new LogicBox(newBoxes, LogicStates.Wire, new Vector2(100, 100)));
+    newBoxes.Add(new LogicBox(newBoxes, LogicStates.Not, new Vector2(100, 300)));
+    newBoxes.Add(new LogicBox(newBoxes, LogicStates.And, new Vector2(100, 500)));
+    newBoxes.Add(new LogicBox(newBoxes, LogicStates.Or, new Vector2(100, 700)));
+    newBoxes.Add(new LogicBox(newBoxes, LogicStates.Xor, new Vector2(300, 100)));
+    newBoxes.Add(new LogicBox(newBoxes, LogicStates.Battery, new Vector2(300, 300)));
+    newBoxes.Add(new LogicBox(newBoxes, LogicStates.Receive, new Vector2(300, 500)));
+    
+    foreach (LogicBox box in newBoxes)
       box.Init();
     selector.Init();
   }

@@ -7,6 +7,6 @@ public enum LogicStates
   And,
   Or,
   Xor,
-  Generator,
-  Receiver
+  Battery,
+  Receive
 }
