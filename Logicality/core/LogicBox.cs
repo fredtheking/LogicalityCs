@@ -46,14 +46,23 @@ public class LogicBox : IScript
     DragRectOffset = new Rectangle(CenterOffset - new Vector2(50, 20), new Vector2(100, 40));
     
     if (State is not LogicStates.Battery)
-      Input1 = new Receiver(this, new Vector2(30, CenterOffset.Y + 34), false);
+      Input1 = new Receiver(this, new Vector2(30, CenterOffset.Y + 41), false);
     if (State is LogicStates.And or LogicStates.Or or LogicStates.Xor)
+    {
+      Input1!.Offset.Y -= 7;
       Input2 = new Receiver(this, new Vector2(30, CenterOffset.Y + 48), false);
+    }
     if (State is not LogicStates.Receive)
       Output = new Receiver(this, new Vector2(Rect.Width - 30, CenterOffset.Y + 41), true);
 
     if (Input1 is not null && State is LogicStates.Wire or LogicStates.Not or LogicStates.Receive)
       Input1.Offset.Y = Output?.Offset.Y ?? CenterOffset.Y + 41;
+  }
+
+  public static void Create(List<LogicBox> boxes, LogicBox box)
+  {
+    box.Init();
+    boxes.Add(box);
   }
 
   private Vector2 CenterText()
@@ -67,6 +76,10 @@ public class LogicBox : IScript
     Hitbox.Init();
     if (State is LogicStates.Battery)
       Output!.State = true;
+
+    if (Input1 != null) Input1.State = true;
+    if (Input2 != null) Input2.State = true;
+    if (Output != null) Output.State = true;
   }
 
   public void Enter()
@@ -105,18 +118,21 @@ public class LogicBox : IScript
     
     if (Input1 is not null)
     {
+      if (Input1.State) DrawCircleGradient((int)(Rect.Position.X + Input1.Offset.X), (int)(Rect.Position.Y + Input1.Offset.Y), 7, Color.DarkGreen, new Color(255, 255, 255, 36));
       DrawCircleV(Rect.Position + Input1.Offset, 5, Input1.State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
       DrawCircleLinesV(Rect.Position + Input1.Offset, 5, Color.Black);
       DrawLineV(Rect.Position + Input1.Offset - Vector2.UnitX * 30, Rect.Position + Input1.Offset - Vector2.UnitX * 5, Color.Black);
     }
     if (Input2 is not null)
     {
+      if (Input2.State) DrawCircleGradient((int)(Rect.Position.X + Input2.Offset.X), (int)(Rect.Position.Y + Input2.Offset.Y), 7, Color.DarkGreen, new Color(255, 255, 255, 36));
       DrawCircleV(Rect.Position + Input2.Offset, 5, Input2.State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
       DrawCircleLinesV(Rect.Position + Input2.Offset, 5, Color.Black);
       DrawLineV(Rect.Position + Input2.Offset - Vector2.UnitX * 30, Rect.Position + Input2.Offset - Vector2.UnitX * 5, Color.Black);
     }
     if (Output is not null)
     {
+      if (Output.State) DrawCircleGradient((int)(Rect.Position.X + Output.Offset.X), (int)(Rect.Position.Y + Output.Offset.Y), 7, Color.DarkGreen, new Color(255, 255, 255, 36));
       DrawCircleV(Rect.Position + Output.Offset, 5, Output.State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
       DrawCircleLinesV(Rect.Position + Output.Offset, 5, Color.Black);
       DrawLineV(Rect.Position + Output.Offset + Vector2.UnitX * 30, Rect.Position + Output.Offset + Vector2.UnitX * 5, Color.Black);

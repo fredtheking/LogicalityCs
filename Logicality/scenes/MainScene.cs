@@ -14,13 +14,13 @@ public class MainScene : Scene
   
   public override void Init()
   {
-    newBoxes.Add(new LogicBox(newBoxes, LogicStates.Wire, new Vector2(100, 100)));
-    newBoxes.Add(new LogicBox(newBoxes, LogicStates.Not, new Vector2(100, 300)));
-    newBoxes.Add(new LogicBox(newBoxes, LogicStates.And, new Vector2(100, 500)));
-    newBoxes.Add(new LogicBox(newBoxes, LogicStates.Or, new Vector2(100, 700)));
-    newBoxes.Add(new LogicBox(newBoxes, LogicStates.Xor, new Vector2(300, 100)));
-    newBoxes.Add(new LogicBox(newBoxes, LogicStates.Battery, new Vector2(300, 300)));
-    newBoxes.Add(new LogicBox(newBoxes, LogicStates.Receive, new Vector2(300, 500)));
+    LogicBox.Create(newBoxes, new LogicBox(newBoxes, LogicStates.Wire, new Vector2(100, 100)));
+    LogicBox.Create(newBoxes, new LogicBox(newBoxes, LogicStates.Not, new Vector2(100, 300)));
+    LogicBox.Create(newBoxes, new LogicBox(newBoxes, LogicStates.And, new Vector2(100, 500)));
+    LogicBox.Create(newBoxes, new LogicBox(newBoxes, LogicStates.Or, new Vector2(100, 700)));
+    LogicBox.Create(newBoxes, new LogicBox(newBoxes, LogicStates.Xor, new Vector2(300, 100)));
+    LogicBox.Create(newBoxes, new LogicBox(newBoxes, LogicStates.Battery, new Vector2(300, 300)));
+    LogicBox.Create(newBoxes, new LogicBox(newBoxes, LogicStates.Receive, new Vector2(300, 500)));
     
     foreach (LogicBox box in newBoxes)
       box.Init();
@@ -36,7 +36,7 @@ public class MainScene : Scene
   {
     selector.Update();
     if (IsMouseButtonPressed(MouseButton.Middle))
-      newBoxes.Add(new LogicBox(newBoxes, selector.Pick(), GetMousePosition()));
+      LogicBox.Create(newBoxes, new LogicBox(newBoxes, selector.Pick(), GetMousePosition() - new Vector2(60, 50)));
 
     foreach (LogicBox box in boxes)
       box.Update();

@@ -47,9 +47,9 @@ public class LogicBoxSelector : IScript
       "A" => LogicStates.And,
       "O" => LogicStates.Or,
       "X" => LogicStates.Xor,
-      "G" => LogicStates.Battery,
+      "B" => LogicStates.Battery,
       "R" => LogicStates.Receive,
-      _ => LogicStates.Wire
+      _ => throw new KeyNotFoundException()
     };
   }
 }
