@@ -76,10 +76,6 @@ public class LogicBox : IScript
     Hitbox.Init();
     if (State is LogicStates.Battery)
       Output!.State = true;
-
-    if (Input1 != null) Input1.State = true;
-    if (Input2 != null) Input2.State = true;
-    if (Output != null) Output.State = true;
   }
 
   public void Enter()
