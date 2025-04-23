@@ -9,8 +9,8 @@ namespace Logicality.core;
 
 public class LogicBox : IScript
 {
-  public List<LogicBox> Boxes;
-  public Dictionary<LogicBox, Vector2> Occipied;
+  public static List<LogicBox> Boxes = [];
+  public static Dictionary<LogicBox, Vector2> Occipied = [];
   public Rectangle RealRect;
   public Vector2 GriddedPosition;
   public Rectangle DragRectOffset;
@@ -25,22 +25,21 @@ public class LogicBox : IScript
   public bool Destroy { get; private set; }
   public LogicStates State { get; private set; }
   public Hitbox Hitbox { get; private set; }
+  public Hitbox DeletionHitbox { get; private set; }
   public Color Color { get; private set; }
   public bool Selected { get; private set; }
   
-  public LogicBox(List<LogicBox> boxes, Dictionary<LogicBox, Vector2> occipied, LogicStates state, Vector2 position)
+  public LogicBox(LogicStates state, Vector2 position)
   {
     RealRect = new Rectangle(position, 120, 100);
     GridPosition();
 
-    if (GridsIntersects(occipied))
+    if (GridsIntersects(Occipied))
     {
       Destroy = true;
       return;
     }
-      
-    Boxes = boxes;
-    Occipied = occipied;
+    
     State = state;
     Color = state switch
     {
@@ -58,6 +57,8 @@ public class LogicBox : IScript
     TextOffset = CenterText();
     DragRectOffset = new Rectangle(CenterOffset - new Vector2(50, 20), new Vector2(100, 40));
     Hitbox = new Hitbox(new Rectangle(position + DragRectOffset.Position, DragRectOffset.Size));
+    DeletionHitbox = new Hitbox(new Rectangle(GriddedPosition, RealRect.Size));
+    DeletionHitbox.Color = new Color(0, 0, 255, 100);
     
     if (State is not LogicStates.Battery)
       Input1 = new Receiver(this, new Vector2(30, CenterOffset.Y + 41), false);
@@ -79,8 +80,8 @@ public class LogicBox : IScript
     if (!box.Destroy)
     {
       box.Init();
-      box.Boxes.Add(box);
-      box.Occipied.Add(box, box.GriddedPosition);
+      Boxes.Add(box);
+      Occipied.Add(box, box.GriddedPosition);
     }
   }
 
@@ -92,7 +93,7 @@ public class LogicBox : IScript
   
   public void Init()
   {
-    Hitbox.Init();
+    Hitbox.Init(); DeletionHitbox.Init();
     Input1?.Init(); Input2?.Init(); Output?.Init();
     if (State is LogicStates.Battery)
       Output!.State = true;
@@ -101,15 +102,22 @@ public class LogicBox : IScript
 
   public void Enter()
   {
-    Hitbox.Enter();
+    Hitbox.Enter(); DeletionHitbox.Enter();
     Input1?.Enter(); Input2?.Enter(); Output?.Enter();
   }
 
   public void Update()
   {
     Occipied[this] = GriddedPosition;
-    Hitbox.Update();
+    Hitbox.Update(); DeletionHitbox.Update();
     Input1?.Update(); Input2?.Update(); Output?.Update();
+    
+    if (DeletionHitbox.Press[(int)MouseButton.Middle])
+    {
+      Boxes.Remove(this);
+      Occipied.Remove(this);
+      return;
+    }
 
     Selected = Hitbox.Drag[(int)MouseButton.Left];
     if (Selected)
@@ -174,12 +182,13 @@ public class LogicBox : IScript
     
     DrawTextEx(GetFontDefault(), State.ToString().ToUpper(), GriddedPosition + TextOffset, 18, 2, Color.Black);
     
-    Hitbox.Render();
+    DeletionHitbox.Render(); Hitbox.Render();
     Input1?.Render(); Input2?.Render(); Output?.Render();
   }
 
   private void GridEtc()
   {
+    DeletionHitbox.Rect.Position = GriddedPosition;
     Hitbox.Rect.Position = GriddedPosition + DragRectOffset.Position;
     if (Input1 is not null) Input1.Hitbox.Rect.Position = GriddedPosition + Input1.Offset - Vector2.One * 5;
     if (Input2 is not null) Input2.Hitbox.Rect.Position = GriddedPosition + Input2.Offset - Vector2.One * 5;

@@ -11,7 +11,7 @@ sceneManager.Change(nameof(MainScene));
 
 // WINDOW SETUP
 SetConfigFlags(ConfigFlags.AlwaysRunWindow | ConfigFlags.HighDpiWindow);
-InitWindow(1920, 1080, "Logicality");
+InitWindow(1280, 720, "Logicality");
 
 // POST-INITIALISATION
 sceneManager.All.ForEach(x => x.Init());

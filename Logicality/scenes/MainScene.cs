@@ -10,13 +10,11 @@ public class MainScene : Scene
   public override string Name => nameof(MainScene);
   public LogicBoxSelector Selector = new();
   public List<LogicBox> FinalBoxes = [];
-  public static List<LogicBox> Boxes = [];
-  public static Dictionary<LogicBox, Vector2> OccupiedCells = [];
   
   public override void Init()
   {
     Selector.Init();
-    foreach (LogicBox box in Boxes)
+    foreach (LogicBox box in LogicBox.Boxes)
       box.Init();
   }
   public override void Enter()
@@ -29,16 +27,16 @@ public class MainScene : Scene
   {
     Selector.Update();
     if (IsMouseButtonPressed(MouseButton.Middle))
-      LogicBox.Create(new LogicBox(Boxes, OccupiedCells, Selector.Pick(), GetMousePosition() - new Vector2(60, 50)));
+      LogicBox.Create(new LogicBox(Selector.Pick(), GetMousePosition() - new Vector2(60, 50)));
 
     foreach (LogicBox box in FinalBoxes)
       box.Update();
-    FinalBoxes = new List<LogicBox>(Boxes);
+    FinalBoxes = new List<LogicBox>(LogicBox.Boxes);
   }
   public override void Render()
   {
     DrawSceneGrid();
-    foreach (LogicBox box in Boxes)
+    foreach (LogicBox box in FinalBoxes)
       box.Render();
     Selector.Render();
   }

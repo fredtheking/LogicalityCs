@@ -8,6 +8,7 @@ namespace Logicality.core;
 public class Hitbox : IScript
 {
   public Rectangle Rect;
+  public Color Color = new Color(255, 0, 0, 100);
   public bool Hover { get; set; }
   public readonly bool[] Click = [false, false, false];
   public readonly bool[] Press = [false, false, false];
@@ -44,7 +45,7 @@ public class Hitbox : IScript
   public void Render()
   {
     if (Config.Debug)
-      DrawRectangleRec(Rect, new Color(255, 0, 0, 100));
+      DrawRectangleRec(Rect, Color);
   }
   
   
