@@ -8,48 +8,40 @@ namespace Logicality.scenes;
 public class MainScene : Scene
 {
   public override string Name => nameof(MainScene);
-  public LogicBoxSelector selector = new();
-  public List<LogicBox> boxes = [];
-  public static List<LogicBox> newBoxes = [];
+  public LogicBoxSelector Selector = new();
+  public List<LogicBox> FinalBoxes = [];
+  public static List<LogicBox> Boxes = [];
+  public static Dictionary<LogicBox, Vector2> OccupiedCells = [];
   
   public override void Init()
   {
-    LogicBox.Create(newBoxes, new LogicBox(newBoxes, LogicStates.Wire, new Vector2(100, 100)));
-    LogicBox.Create(newBoxes, new LogicBox(newBoxes, LogicStates.Not, new Vector2(100, 300)));
-    LogicBox.Create(newBoxes, new LogicBox(newBoxes, LogicStates.And, new Vector2(100, 500)));
-    LogicBox.Create(newBoxes, new LogicBox(newBoxes, LogicStates.Or, new Vector2(100, 700)));
-    LogicBox.Create(newBoxes, new LogicBox(newBoxes, LogicStates.Xor, new Vector2(300, 100)));
-    LogicBox.Create(newBoxes, new LogicBox(newBoxes, LogicStates.Battery, new Vector2(300, 300)));
-    LogicBox.Create(newBoxes, new LogicBox(newBoxes, LogicStates.Receive, new Vector2(300, 500)));
-    
-    foreach (LogicBox box in newBoxes)
+    Selector.Init();
+    foreach (LogicBox box in Boxes)
       box.Init();
-    selector.Init();
   }
   public override void Enter()
   {
-    foreach (LogicBox box in boxes)
+    Selector.Enter();
+    foreach (LogicBox box in FinalBoxes)
       box.Enter();
-    selector.Enter();
   }
   public override void Update()
   {
-    selector.Update();
+    Selector.Update();
     if (IsMouseButtonPressed(MouseButton.Middle))
-      LogicBox.Create(newBoxes, new LogicBox(newBoxes, selector.Pick(), GetMousePosition() - new Vector2(60, 50)));
+      LogicBox.Create(new LogicBox(Boxes, OccupiedCells, Selector.Pick(), GetMousePosition() - new Vector2(60, 50)));
 
-    foreach (LogicBox box in boxes)
+    foreach (LogicBox box in FinalBoxes)
       box.Update();
-    boxes = new List<LogicBox>(newBoxes);
+    FinalBoxes = new List<LogicBox>(Boxes);
   }
   public override void Render()
   {
     DrawSceneGrid();
-    foreach (LogicBox box in newBoxes)
+    foreach (LogicBox box in Boxes)
       box.Render();
-    selector.Render();
+    Selector.Render();
   }
-
 
   private void DrawSceneGrid()
   {

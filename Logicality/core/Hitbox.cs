@@ -7,7 +7,7 @@ namespace Logicality.core;
 
 public class Hitbox : IScript
 {
-  public Rectangle Rect { get; set; }
+  public Rectangle Rect;
   public bool Hover { get; set; }
   public readonly bool[] Click = [false, false, false];
   public readonly bool[] Press = [false, false, false];
