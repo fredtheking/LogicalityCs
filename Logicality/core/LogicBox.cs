@@ -26,7 +26,7 @@ public class LogicBox : IScript
   public LogicStates State { get; private set; }
   public Hitbox Hitbox { get; private set; }
   public Hitbox DeletionHitbox { get; private set; }
-  public Color Color { get; private set; }
+  public Color Color { get; init; }
   public bool Selected { get; private set; }
   
   public LogicBox(LogicStates state, Vector2 position)
@@ -134,6 +134,9 @@ public class LogicBox : IScript
       {
         AllowDrawBorder = true;
       }
+
+      Boxes.Remove(this);
+      Boxes.Add(this);
     }
     else
     {
@@ -147,7 +150,11 @@ public class LogicBox : IScript
     Rectangle griddedRectangle = new Rectangle(GriddedPosition, RealRect.Size);
     DrawRectangleRec(griddedRectangle, Color);
     DrawRectangleLinesEx(griddedRectangle, 2, Color.Black);
-    if (AllowDrawBorder) DrawRectangleLinesEx(new Rectangle(RealRect.Position, RealRect.Size), 1, Color.Brown);
+    if (AllowDrawBorder)
+    {
+      DrawRectangleLinesEx(RealRect, 2, Color.DarkGray);
+      DrawRectangleLinesEx(RealRect, 1, Color);
+    }
 
     Rectangle selectionRect = new(GriddedPosition + DragRectOffset.Position, DragRectOffset.Size);
     DrawRectangleRec(selectionRect, Selected ? new Color(240, 240, 255,255) : Color.White);
@@ -202,8 +209,17 @@ public class LogicBox : IScript
       (int)Math.Round(RealRect.Y / 20) * 20
     );
   }
-
-  private bool GridsIntersects(Dictionary<LogicBox, Vector2> occ) =>
-    occ.Where(p => p.Key != this).Any(p =>
-      CheckCollisionRecs(new Rectangle(p.Value, 120, 100), new Rectangle(RealRect.Position, 120, 100)));
+  
+  private bool GridsIntersects(Dictionary<LogicBox, Vector2> occ)
+  {
+    // Checks whether it overlaps with any other box
+    bool first = occ.Where(p => p.Key != this).Any(p =>
+      CheckCollisionRecs(new Rectangle(p.Value, 120, 100), RealRect));
+    
+    // Checks if the box is scene boundaries (from Size to Resolution-Size*2)
+    bool second = !CheckCollisionRecs(RealRect, new Rectangle(120, 100, Config.Resolution - new Vector2(120, 100) * 2));
+    
+    // Both of them are "invalid position", so either of them should be true
+    return first || second;
+  }
 }

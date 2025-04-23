@@ -8,7 +8,19 @@ public class LogicBoxSelector : IScript
 {
   private string[] Names = ["W", "N", "A", "O", "X", "B", "R"];
   List<SelectorOption> Options = [];
-  public int Selected;
+
+  public int Selected
+  {
+    get
+    {
+      return Options.FindIndex(x => x.Selected);
+    }
+    set
+    {
+      Options.ForEach(x => x.Selected = false); 
+      Options[value].Selected = true;
+    }
+  }
 
   public void Init()
   {

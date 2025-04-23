@@ -29,6 +29,10 @@ public class MainScene : Scene
     if (IsMouseButtonPressed(MouseButton.Middle))
       LogicBox.Create(new LogicBox(Selector.Pick(), GetMousePosition() - new Vector2(60, 50)));
 
+    KeyboardKey keyPressed = (KeyboardKey)GetKeyPressed();
+    if (keyPressed is >= KeyboardKey.One and <= KeyboardKey.Seven)
+      Selector.Selected = keyPressed - KeyboardKey.One;
+    
     foreach (LogicBox box in FinalBoxes)
       box.Update();
     FinalBoxes = new List<LogicBox>(LogicBox.Boxes);
