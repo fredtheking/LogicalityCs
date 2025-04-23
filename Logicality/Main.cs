@@ -1,4 +1,5 @@
-﻿using Logicality.managers;
+﻿using System.Diagnostics;
+using Logicality.managers;
 using Logicality.scenes;
 using Logicality.utils;
 using static Raylib_cs.Raylib;
@@ -42,13 +43,17 @@ while (!WindowShouldClose())
   
   BeginDrawing();
   ClearBackground(new Color(18, 5, 21, 255));
+  BeginMode2D(Config.Camera);
   
   // RENDER
   sceneManager.Current.Render();
   // GLOBAL-RENDER
-  if (Config.Debug)
-    DrawFPS(10, 10);    
+  // ...
   
+  EndMode2D();
+  sceneManager.Current.Overlay?.Invoke();
+  if (Config.Debug)
+    DrawFPS(10, 10);
   EndDrawing();
   
   // CHANGE SCENE IF NEEDED

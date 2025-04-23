@@ -35,12 +35,8 @@ public class LogicBoxSelector : IScript
     for (int i = 0; i < Options.Count; i++)
     {
       Options[i].Update();
-      if (Options[i].Hitbox.Press[(int)MouseButton.Left])
-      {
+      if (Options[i].Hitbox.Press[(int)MouseButton.Left]) 
         Selected = i;
-        Options.ForEach(x => x.Selected = false);
-        Options[i].Selected = true;
-      }
     }
   }
   public void Render()

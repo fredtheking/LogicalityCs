@@ -31,7 +31,8 @@ public class Hitbox : IScript
 
   public void Update()
   {
-    Hover = CheckCollisionPointRec(GetMousePosition(), Rect);
+    
+    Hover = CheckCollisionPointRec(GetScreenToWorld2D(GetMousePosition(), Config.Camera), Rect);
     for (int i = 0; i < 3; i++)
     {
       Click[i] = IsMouseButtonPressed((MouseButton)i);

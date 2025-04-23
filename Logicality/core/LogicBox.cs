@@ -112,7 +112,7 @@ public class LogicBox : IScript
     Hitbox.Update(); DeletionHitbox.Update();
     Input1?.Update(); Input2?.Update(); Output?.Update();
     
-    if (DeletionHitbox.Press[(int)MouseButton.Middle])
+    if (DeletionHitbox.Press[(int)MouseButton.Right])
     {
       Boxes.Remove(this);
       Occipied.Remove(this);
@@ -122,7 +122,7 @@ public class LogicBox : IScript
     Selected = Hitbox.Drag[(int)MouseButton.Left];
     if (Selected)
     {
-      RealRect.Position += GetMouseDelta();
+      RealRect.Position += GetScreenToWorld2D(GetMouseDelta(), Config.Camera);
 
       if (!GridsIntersects(Occipied))
       {
