@@ -18,15 +18,11 @@ public class SelectorOption : IScript
     Hitbox = new(Rect);
   }
 
-  public void Init()
-  {
-    
-  }
+  public void Init() { }
 
-  public void Enter()
-  {
-    
-  }
+  public void Enter() { }
+  
+  public void Leave() { }
 
   public void Update()
   {

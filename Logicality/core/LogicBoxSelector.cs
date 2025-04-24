@@ -30,6 +30,7 @@ public class LogicBoxSelector : IScript
     Options.ForEach(x => x.Hitbox.OverlayHitbox = true);
   }
   public void Enter() { }
+  public void Leave() { }
   public void Update()
   {
     Selected = Math.Clamp(Selected, 0, Options.Count - 1);

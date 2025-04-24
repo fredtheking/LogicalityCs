@@ -20,15 +20,11 @@ public class Hitbox : IScript
   public Hitbox() { }
   public Hitbox(Rectangle rect) => Rect = rect;
   
-  public void Init()
-  {
-    
-  }
+  public void Init() { }
 
-  public void Enter()
-  {
-    
-  }
+  public void Enter() { }
+  
+  public void Leave() { }
 
   public void Update()
   {

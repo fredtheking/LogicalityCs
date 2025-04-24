@@ -29,6 +29,11 @@ public class Receiver : IScript
   {
     Hitbox.Enter();
   }
+  
+  public void Leave()
+  {
+    Hitbox.Leave();
+  }
 
   public void Update()
   {

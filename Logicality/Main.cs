@@ -8,11 +8,13 @@ using Raylib_cs;
 // PRE-INITIALISATION
 SceneManager sceneManager = new();
 sceneManager.Add(new MainScene());
+sceneManager.Add(new MenuScene());
 sceneManager.Change(nameof(MainScene));
 
 // WINDOW SETUP
 SetConfigFlags(ConfigFlags.AlwaysRunWindow | ConfigFlags.HighDpiWindow);
 InitWindow((int)Config.Resolution.X, (int)Config.Resolution.Y, "Logicality");
+InitAudioDevice();
 
 // POST-INITIALISATION
 sceneManager.All.ForEach(x => x.Init());
@@ -53,11 +55,15 @@ while (!WindowShouldClose())
   EndMode2D();
   sceneManager.Current.Overlay?.Invoke();
   if (Config.Debug)
+  {
     DrawFPS(10, 10);
+    DrawText(sceneManager.Current.Name, 10, 30, 20, Color.White);
+  }
   EndDrawing();
   
   // CHANGE SCENE IF NEEDED
   sceneManager.ActualChange();
 }
 
+CloseAudioDevice();
 CloseWindow();
