@@ -29,16 +29,14 @@ public class MainScene : Scene
   {
     Selector.Update();
     if (IsMouseButtonPressed(MouseButton.Right))
-      LogicBox.Create(new LogicBox(Selector.Pick(), GetMousePosition() - new Vector2(60, 50)));
+      LogicBox.Create(new LogicBox(Selector.Pick(), GetScreenToWorld2D(GetMousePosition(), Config.Camera) - new Vector2(60, 50)));
 
     KeyboardKey keyPressed = (KeyboardKey)GetKeyPressed();
     if (keyPressed is >= KeyboardKey.One and <= KeyboardKey.Seven)
       Selector.Selected = keyPressed - KeyboardKey.One;
     
-    if (IsKeyDown(KeyboardKey.W)) Config.Camera.Target -= Vector2.UnitY * 200 * GetFrameTime();
-    if (IsKeyDown(KeyboardKey.A)) Config.Camera.Target -= Vector2.UnitX * 200 * GetFrameTime();
-    if (IsKeyDown(KeyboardKey.S)) Config.Camera.Target += Vector2.UnitY * 200 * GetFrameTime();
-    if (IsKeyDown(KeyboardKey.D)) Config.Camera.Target += Vector2.UnitX * 200 * GetFrameTime();
+    if (IsMouseButtonDown(MouseButton.Middle))
+      Config.Camera.Target -= GetMouseDelta() / Config.Camera.Zoom;
     Config.Camera.Zoom += GetMouseWheelMoveV().Y * 200 * GetFrameTime();
     
     Config.Camera.Zoom = Math.Clamp(Config.Camera.Zoom, 0.1f, 5f);
@@ -58,7 +56,7 @@ public class MainScene : Scene
   {
     int step = 20;
     float intensity = 0.67f;
-    Color purpa = new(23, 8, 25, 255);
+    Color purpa = new(28, 13, 29, 255);
     for (int i = 0; i < Config.Resolution.X / step + 1; ++i)
       DrawLineV(new Vector2((float)(i * step + Math.Sin(GetTime() * 1.3 * i*2) * intensity), 0), Config.Resolution with { X = (float)(i * step + Math.Sin(GetTime() * 3.5 * i*2) * intensity) }, purpa);
     for (int i = 0; i < Config.Resolution.Y / step + 1; ++i)

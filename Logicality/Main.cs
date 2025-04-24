@@ -42,7 +42,7 @@ while (!WindowShouldClose())
   
   
   BeginDrawing();
-  ClearBackground(new Color(18, 5, 21, 255));
+  ClearBackground(new(23, 8, 25, 255));
   BeginMode2D(Config.Camera);
   
   // RENDER
