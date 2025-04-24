@@ -14,6 +14,7 @@ public class MainScene : Scene
   public List<LogicBox> FinalBoxes = [];
   public float RotationShock = 0;
   public Sound? PlaceSound;
+  public Sound? DisappearSound;
   
   public override void Init()
   {
@@ -32,6 +33,8 @@ public class MainScene : Scene
     Config.Camera.Zoom = 1;
     
     PlaceSound = LoadSound("assets/sounds/place.ogg");
+    DisappearSound = LoadSound("assets/sounds/disappear.ogg");
+    
     Selector.Enter();
     foreach (LogicBox box in FinalBoxes)
       box.Enter();
@@ -45,6 +48,8 @@ public class MainScene : Scene
     
     UnloadSound(PlaceSound!.Value);
     PlaceSound = null;
+    UnloadSound(DisappearSound!.Value);
+    DisappearSound = null;
     
     Selector.Leave();
     foreach (LogicBox box in FinalBoxes)
@@ -65,7 +70,11 @@ public class MainScene : Scene
     MoveCamera();
     
     foreach (LogicBox box in FinalBoxes)
+    {
       box.Update();
+      if (box.Destroy)
+        PlaySound(DisappearSound!.Value);
+    }
     FinalBoxes = new List<LogicBox>(LogicBox.Boxes);
   }
   public override void Render()

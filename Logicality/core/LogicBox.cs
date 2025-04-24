@@ -118,9 +118,19 @@ public class LogicBox : IScript
     Hitbox?.Leave(); DeletionHitbox?.Leave();
     Input1?.Leave(); Input2?.Leave(); Output?.Leave();
   }
+  
+  private bool DestroyCheck()
+  {
+    if (!Destroy) return false;
+    Occipied.Remove(this);
+    Boxes.Remove(this);
+    return true;
+  }
 
   public void Update()
   {
+    if (DestroyCheck()) return;
+    
     Occipied[this] = GriddedPosition;
     Hitbox?.Update(); DeletionHitbox?.Update();
     Input1?.Update(); Input2?.Update(); Output?.Update();
@@ -129,8 +139,7 @@ public class LogicBox : IScript
     {
       if (DeletionHitbox!.Press[(int)MouseButton.Right])
       {
-        Boxes.Remove(this);
-        Occipied.Remove(this);
+        Destroy = true;
         return;
       }
 
