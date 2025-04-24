@@ -122,7 +122,7 @@ public class LogicBox : IScript
     Selected = Hitbox.Drag[(int)MouseButton.Left];
     if (Selected)
     {
-      RealRect.Position += GetScreenToWorld2D(GetMouseDelta(), Config.Camera);
+      RealRect.Position += GetMouseDelta() / Config.Camera.Zoom;
 
       if (!GridsIntersects(Occipied))
       {

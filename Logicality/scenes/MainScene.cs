@@ -39,8 +39,9 @@ public class MainScene : Scene
     if (IsKeyDown(KeyboardKey.A)) Config.Camera.Target -= Vector2.UnitX * 200 * GetFrameTime();
     if (IsKeyDown(KeyboardKey.S)) Config.Camera.Target += Vector2.UnitY * 200 * GetFrameTime();
     if (IsKeyDown(KeyboardKey.D)) Config.Camera.Target += Vector2.UnitX * 200 * GetFrameTime();
-    if (IsKeyDown(KeyboardKey.R)) Config.Camera.Zoom += 0.1f * GetFrameTime();
-    if (IsKeyDown(KeyboardKey.F)) Config.Camera.Zoom -= 0.1f * GetFrameTime();
+    Config.Camera.Zoom += GetMouseWheelMoveV().Y * 200 * GetFrameTime();
+    
+    Config.Camera.Zoom = Math.Clamp(Config.Camera.Zoom, 0.1f, 5f);
     
     foreach (LogicBox box in FinalBoxes)
       box.Update();
