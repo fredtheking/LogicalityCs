@@ -35,11 +35,14 @@ public class MainScene : Scene
     if (keyPressed is >= KeyboardKey.One and <= KeyboardKey.Seven)
       Selector.Selected = keyPressed - KeyboardKey.One;
     
-    if (IsMouseButtonDown(MouseButton.Middle))
+    if (IsMouseButtonDown(MouseButton.Middle) && !IsMouseButtonDown(MouseButton.Left))
       Config.Camera.Target -= GetMouseDelta() / Config.Camera.Zoom;
     Config.Camera.Zoom += GetMouseWheelMoveV().Y * 200 * GetFrameTime();
     
     Config.Camera.Zoom = Math.Clamp(Config.Camera.Zoom, 0.1f, 5f);
+    
+    Config.Camera.Target.X = Math.Clamp(Config.Camera.Target.X, 0, Config.MapSize.X);
+    Config.Camera.Target.Y = Math.Clamp(Config.Camera.Target.Y, 0, Config.MapSize.Y);
     
     foreach (LogicBox box in FinalBoxes)
       box.Update();
@@ -55,11 +58,11 @@ public class MainScene : Scene
   private void DrawSceneGrid()
   {
     int step = 20;
-    float intensity = 0.67f;
-    Color purpa = new(28, 13, 29, 255);
-    for (int i = 0; i < Config.Resolution.X / step + 1; ++i)
-      DrawLineV(new Vector2((float)(i * step + Math.Sin(GetTime() * 1.3 * i*2) * intensity), 0), Config.Resolution with { X = (float)(i * step + Math.Sin(GetTime() * 3.5 * i*2) * intensity) }, purpa);
-    for (int i = 0; i < Config.Resolution.Y / step + 1; ++i)
-      DrawLineV(new Vector2(0, (float)(i * step + Math.Sin(GetTime() * 3.5 * i*2) * intensity)), Config.Resolution with { Y = (float)(i * step + Math.Sin(GetTime() * 1.3 * i*2) * intensity) }, purpa);
+    float intensity = 2f;
+    Color purpa = new(58, 30, 54, 255);
+    for (int i = 0; i < Config.MapSize.X / step + 1; ++i)
+      DrawLineV(new Vector2((float)(i * step + Math.Sin(GetTime()*2) * intensity), 0), Config.MapSize with { X = (float)(i * step + Math.Sin(GetTime()*1.2f) * intensity) }, purpa);
+    for (int i = 0; i < Config.MapSize.Y / step + 1; ++i)
+      DrawLineV(new Vector2(0, (float)(i * step + Math.Sin(GetTime()*1.2f) * intensity)), Config.MapSize with { Y = (float)(i * step + Math.Sin(GetTime()*2) * intensity) }, purpa);
   }
 }

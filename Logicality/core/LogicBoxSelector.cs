@@ -27,6 +27,7 @@ public class LogicBoxSelector : IScript
     for (int i = 0; i < Names.Length; i++) 
       Options.Add(new SelectorOption(new(33 * i + 300, 0, 30, 30), Names[i]));
     Options[0].Selected = true;
+    Options.ForEach(x => x.Hitbox.OverlayHitbox = true);
   }
   public void Enter() { }
   public void Update()

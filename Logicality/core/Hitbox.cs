@@ -7,6 +7,7 @@ namespace Logicality.core;
 
 public class Hitbox : IScript
 {
+  public bool OverlayHitbox = false;
   public Rectangle Rect;
   public Color Color = new Color(255, 0, 0, 100);
   public bool Hover { get; set; }
@@ -32,7 +33,7 @@ public class Hitbox : IScript
   public void Update()
   {
     
-    Hover = CheckCollisionPointRec(GetScreenToWorld2D(GetMousePosition(), Config.Camera), Rect);
+    Hover = CheckCollisionPointRec(OverlayHitbox ? GetMousePosition() : GetScreenToWorld2D(GetMousePosition(), Config.Camera), Rect);
     for (int i = 0; i < 3; i++)
     {
       Click[i] = IsMouseButtonPressed((MouseButton)i);
