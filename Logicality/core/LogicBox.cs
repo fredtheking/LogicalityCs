@@ -30,6 +30,7 @@ public class LogicBox : IScript
   public Hitbox? DeletionHitbox { get; private set; }
   public Color Color { get; init; }
   public bool Selected { get; private set; }
+  public int StartedDragging { get; set; }
   
   public LogicBox(LogicStates state, Vector2 position, bool defaultInactive = false)
   {
@@ -65,17 +66,25 @@ public class LogicBox : IScript
       DeletionHitbox = new Hitbox(new Rectangle(GriddedPosition, RealRect.Size));
       DeletionHitbox.Color = new Color(0, 0, 255, 100);
     }
-    
+
     if (State is not LogicStates.Battery)
-      Input1 = new Receiver(this, new Vector2(30, CenterOffset.Y + 41), false);
+    {
+      Vector2 offset = new(30, CenterOffset.Y + 41);
+      Input1 = new Receiver(this, offset, offset - Vector2.UnitX * 30, false);
+    }
     if (State is LogicStates.And or LogicStates.Or or LogicStates.Xor)
     {
       Input1!.Offset.Y -= 7;
+      Input1!.StartWireOffset.Y -= 7;
       Input1!.Hitbox.Rect.Y -= 7;
-      Input2 = new Receiver(this, new Vector2(30, CenterOffset.Y + 48), false);
+      Vector2 offset = new(30, CenterOffset.Y + 48);
+      Input2 = new Receiver(this, offset, offset - Vector2.UnitX * 30, false);
     }
     if (State is not LogicStates.Receive)
-      Output = new Receiver(this, new Vector2(RealRect.Width - 30, CenterOffset.Y + 41), true);
+    {
+      Vector2 offset = new(RealRect.Width - 30, CenterOffset.Y + 41);
+      Output = new Receiver(this, offset, offset + Vector2.UnitX * 30, true);
+    }
 
     if (Input1 is not null && State is LogicStates.Wire or LogicStates.Not or LogicStates.Receive)
       Input1.Offset.Y = Output?.Offset.Y ?? CenterOffset.Y + 41;
@@ -86,6 +95,9 @@ public class LogicBox : IScript
     if (!box.Destroy)
     {
       box.Init();
+      if (box.Input1 != null) Receiver.Receivers.Add(box.Input1);
+      if (box.Input2 != null) Receiver.Receivers.Add(box.Input2);
+      if (box.Output != null) Receiver.Receivers.Add(box.Output);
       Boxes.Add(box);
       Occipied.Add(box, box.GriddedPosition);
       return true;
@@ -119,11 +131,17 @@ public class LogicBox : IScript
   {
     Hitbox?.Leave(); DeletionHitbox?.Leave();
     Input1?.Leave(); Input2?.Leave(); Output?.Leave();
+
+    Destroy = true;
+    DestroyCheck();
   }
   
   private bool DestroyCheck()
   {
     if (!Destroy) return false;
+    if (Input1 != null) Receiver.Receivers.Remove(Input1);
+    if (Input2 != null) Receiver.Receivers.Remove(Input2);
+    if (Output != null) Receiver.Receivers.Remove(Output);
     Occipied.Remove(this);
     Boxes.Remove(this);
     return true;
@@ -140,12 +158,14 @@ public class LogicBox : IScript
     
     if (!Inactive)
     {
+      // Deletion
       if (DeletionHitbox!.Press[(int)MouseButton.Right])
       {
         Destroy = true;
         return;
       }
-
+      
+      // Selection
       Selected = Hitbox!.Drag[(int)MouseButton.Left];
       if (Selected)
       {
@@ -161,15 +181,21 @@ public class LogicBox : IScript
         {
           AllowDrawBorder = true;
         }
-
-        Boxes.Remove(this);
-        Boxes.Add(this);
       }
       else
       {
         AllowDrawBorder = false;
         RealRect.Position = GriddedPosition;
       }
+      
+      // Wires
+      if (StartedDragging > 0 || Selected)
+      {
+        Boxes.Remove(this);
+        Boxes.Add(this);
+      }
+
+      StartedDragging = 0;
     }
   }
 

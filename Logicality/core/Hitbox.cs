@@ -15,6 +15,7 @@ public class Hitbox : IScript
   public readonly bool[] Press = [false, false, false];
   public readonly bool[] Down = [false, false, false];
   public readonly bool[] Hold = [false, false, false];
+  public readonly bool[] Release = [false, false, false];
   public readonly bool[] Drag = [false, false, false];
 
   public Hitbox() { }
@@ -36,6 +37,7 @@ public class Hitbox : IScript
       Press[i] = Click[i] && Hover;
       Down[i] = IsMouseButtonDown((MouseButton)i);
       Hold[i] = Down[i] && Hover;
+      Release[i] = IsMouseButtonReleased((MouseButton)i);
       Drag[i] = CalcDrag(i);
     }
   }

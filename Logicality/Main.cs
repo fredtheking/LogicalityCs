@@ -19,28 +19,20 @@ InitAudioDevice();
 
 // POST-INITIALISATION
 sceneManager.All.ForEach(x => x.Init());
-sceneManager.ActualChange();
+sceneManager.ActualChange(true);
 
 // MAIN LOOP
 while (!WindowShouldClose())
 {
-  // ENTER CHECK
-  if (sceneManager.Changed)
-  {
-    // ENTER
-    sceneManager.Current.Enter();
-    sceneManager.Changed = false;
-    // GLOBAL-ENTER
-    // ...
-  }
-  
-  
-  
   // UPDATE
   sceneManager.Current.Update();
   // GLOBAL-UPDATE
   if (IsKeyPressed(KeyboardKey.F3) || IsKeyPressed(KeyboardKey.Grave))
     Config.Debug = !Config.Debug;
+  if (IsKeyPressed(KeyboardKey.F1))
+    sceneManager.Previous();
+  else if (IsKeyPressed(KeyboardKey.F2))
+    sceneManager.Next();
   
   
   
