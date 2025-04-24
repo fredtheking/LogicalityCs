@@ -101,7 +101,7 @@ public class LogicBox : IScript
   
   public void Init()
   {
-    SmoothedGriddedPosition = GriddedPosition with { Y = GriddedPosition.Y - 5 };
+    SmoothedGriddedPosition = GriddedPosition - GetMouseDelta();
     Hitbox?.Init(); DeletionHitbox?.Init();
     Input1?.Init(); Input2?.Init(); Output?.Init();
     if (State is LogicStates.Battery)
