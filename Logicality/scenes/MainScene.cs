@@ -15,11 +15,10 @@ public class MainScene : Scene
   public float RotationShock = 0;
   public Sound? PlaceSound;
   public Sound? DisappearSound;
+  public float CameraZoom = 1;
   
   public override void Init()
   {
-    LogicBox.Create(new LogicBox(LogicStates.Not, Vector2.One * 70, true));
-    
     Selector.Init();
     foreach (LogicBox box in LogicBox.Boxes)
       box.Init();
@@ -31,6 +30,7 @@ public class MainScene : Scene
     Config.Camera.Target = Config.MapSize / 2;
     Config.Camera.Rotation = 0;
     Config.Camera.Zoom = 1;
+    CameraZoom = 1;
     
     PlaceSound = LoadSound("assets/sounds/place.ogg");
     DisappearSound = LoadSound("assets/sounds/disappear.ogg");
@@ -114,10 +114,10 @@ public class MainScene : Scene
   {
     if (IsMouseButtonDown(MouseButton.Middle) && !IsMouseButtonDown(MouseButton.Left))
       Config.Camera.Target -= GetMouseDelta() / Config.Camera.Zoom;
-    Config.Camera.Zoom += GetMouseWheelMoveV().Y * 200 * GetFrameTime();
+    CameraZoom += GetMouseWheelMoveV().Y * 0.1f;
+    CameraZoom = Math.Clamp(CameraZoom, 0.4f, 5f);
     
-    Config.Camera.Zoom = Math.Clamp(Config.Camera.Zoom, 0.1f, 5f);
-    
+    Config.Camera.Zoom = Raymath.Lerp(Config.Camera.Zoom, CameraZoom, 16f * GetFrameTime());
     Config.Camera.Target.X = Math.Clamp(Config.Camera.Target.X, 0, Config.MapSize.X);
     Config.Camera.Target.Y = Math.Clamp(Config.Camera.Target.Y, 0, Config.MapSize.Y);
   }

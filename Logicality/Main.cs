@@ -15,6 +15,7 @@ sceneManager.Change(nameof(MainScene));
 SetConfigFlags(ConfigFlags.AlwaysRunWindow | ConfigFlags.HighDpiWindow);
 InitWindow((int)Config.Resolution.X, (int)Config.Resolution.Y, "Logicality");
 InitAudioDevice();
+//SetTargetFPS(30);
 
 // POST-INITIALISATION
 sceneManager.All.ForEach(x => x.Init());

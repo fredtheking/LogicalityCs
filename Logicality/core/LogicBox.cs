@@ -13,6 +13,7 @@ public class LogicBox : IScript
   public static Dictionary<LogicBox, Vector2> Occipied = [];
   public Rectangle RealRect;
   public Vector2 GriddedPosition;
+  public Vector2 SmoothedGriddedPosition;
   public Rectangle DragRectOffset;
   public Vector2 CenterOffset;
   public Vector2 TextOffset;
@@ -100,6 +101,7 @@ public class LogicBox : IScript
   
   public void Init()
   {
+    SmoothedGriddedPosition = GriddedPosition with { Y = GriddedPosition.Y - 5 };
     Hitbox?.Init(); DeletionHitbox?.Init();
     Input1?.Init(); Input2?.Init(); Output?.Init();
     if (State is LogicStates.Battery)
@@ -129,6 +131,7 @@ public class LogicBox : IScript
 
   public void Update()
   {
+    SmoothedGriddedPosition = Vector2.Lerp(SmoothedGriddedPosition, GriddedPosition, 16f * GetFrameTime());
     if (DestroyCheck()) return;
     
     Occipied[this] = GriddedPosition;
@@ -172,12 +175,12 @@ public class LogicBox : IScript
 
   public void Render()
   {
-    Rectangle griddedRectangle = new Rectangle(GriddedPosition, RealRect.Size);
+    Rectangle griddedRectangle = new Rectangle(SmoothedGriddedPosition, RealRect.Size);
     DrawRectangleRec(griddedRectangle, Color);
     if (Inactive) DrawRectangleLinesEx(new Rectangle(griddedRectangle.Position - Vector2.One * 1, griddedRectangle.Size + Vector2.One * 2), 2, Color.Yellow);
     DrawRectangleLinesEx(griddedRectangle, 1, Color.Black);
 
-    Rectangle selectionRect = new(GriddedPosition + DragRectOffset.Position, DragRectOffset.Size);
+    Rectangle selectionRect = new(SmoothedGriddedPosition + DragRectOffset.Position, DragRectOffset.Size);
     DrawRectangleRec(selectionRect, Selected && !Inactive ? new Color(240, 240, 255,255) : Color.White);
     if (!Inactive && Hitbox!.Hover && Selected)
       DrawRectangleLinesEx(selectionRect, 2, Color.DarkBlue);
@@ -188,27 +191,27 @@ public class LogicBox : IScript
     
     if (Input1 is not null)
     {
-      if (Input1.State) DrawCircleGradient((int)(GriddedPosition.X + Input1.Offset.X), (int)(GriddedPosition.Y + Input1.Offset.Y), 7, Color.DarkGreen, new Color(255, 255, 255, 36));
-      DrawCircleV(GriddedPosition + Input1.Offset, 5, Input1.State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
-      DrawRectangleRoundedLinesEx(new Rectangle(GriddedPosition + Input1.Offset - Vector2.One * 5, 10, 10), 1, 10, 1.01f, Color.Black);
-      DrawLineEx(GriddedPosition + Input1.Offset - Vector2.UnitX * 30, GriddedPosition + Input1.Offset - Vector2.UnitX * 5, 1.01f, Color.Black);
+      if (Input1.State) DrawCircleGradient((int)(SmoothedGriddedPosition.X + Input1.Offset.X), (int)(SmoothedGriddedPosition.Y + Input1.Offset.Y), 7, Color.DarkGreen, new Color(255, 255, 255, 36));
+      DrawCircleV(SmoothedGriddedPosition + Input1.Offset, 5, Input1.State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
+      DrawRectangleRoundedLinesEx(new Rectangle(SmoothedGriddedPosition + Input1.Offset - Vector2.One * 5, 10, 10), 1, 10, 1.01f, Color.Black);
+      DrawLineEx(SmoothedGriddedPosition + Input1.Offset - Vector2.UnitX * 30, SmoothedGriddedPosition + Input1.Offset - Vector2.UnitX * 5, 1.01f, Color.Black);
     }
     if (Input2 is not null)
     {
-      if (Input2.State) DrawCircleGradient((int)(GriddedPosition.X + Input2.Offset.X), (int)(GriddedPosition.Y + Input2.Offset.Y), 7, Color.DarkGreen, new Color(255, 255, 255, 36));
-      DrawCircleV(GriddedPosition + Input2.Offset, 5, Input2.State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
-      DrawRectangleRoundedLinesEx(new Rectangle(GriddedPosition + Input2.Offset - Vector2.One * 5, 10, 10), 1, 10, 1.01f, Color.Black);
-      DrawLineEx(GriddedPosition + Input2.Offset - Vector2.UnitX * 30, GriddedPosition + Input2.Offset - Vector2.UnitX * 5, 1.01f, Color.Black);
+      if (Input2.State) DrawCircleGradient((int)(SmoothedGriddedPosition.X + Input2.Offset.X), (int)(SmoothedGriddedPosition.Y + Input2.Offset.Y), 7, Color.DarkGreen, new Color(255, 255, 255, 36));
+      DrawCircleV(SmoothedGriddedPosition + Input2.Offset, 5, Input2.State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
+      DrawRectangleRoundedLinesEx(new Rectangle(SmoothedGriddedPosition + Input2.Offset - Vector2.One * 5, 10, 10), 1, 10, 1.01f, Color.Black);
+      DrawLineEx(SmoothedGriddedPosition + Input2.Offset - Vector2.UnitX * 30, SmoothedGriddedPosition + Input2.Offset - Vector2.UnitX * 5, 1.01f, Color.Black);
     }
     if (Output is not null)
     {
-      if (Output.State) DrawCircleGradient((int)(GriddedPosition.X + Output.Offset.X), (int)(GriddedPosition.Y + Output.Offset.Y), 7, Color.DarkGreen, new Color(255, 255, 255, 36));
-      DrawCircleV(GriddedPosition + Output.Offset, 5, Output.State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
-      DrawRectangleRoundedLinesEx(new Rectangle(GriddedPosition + Output.Offset - Vector2.One * 5, 10, 10), 1, 10, 1.01f, Color.Black);
-      DrawLineEx(GriddedPosition + Output.Offset + Vector2.UnitX * 30, GriddedPosition + Output.Offset + Vector2.UnitX * 5, 1.01f, Color.Black);
+      if (Output.State) DrawCircleGradient((int)(SmoothedGriddedPosition.X + Output.Offset.X), (int)(SmoothedGriddedPosition.Y + Output.Offset.Y), 7, Color.DarkGreen, new Color(255, 255, 255, 36));
+      DrawCircleV(SmoothedGriddedPosition + Output.Offset, 5, Output.State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
+      DrawRectangleRoundedLinesEx(new Rectangle(SmoothedGriddedPosition + Output.Offset - Vector2.One * 5, 10, 10), 1, 10, 1.01f, Color.Black);
+      DrawLineEx(SmoothedGriddedPosition + Output.Offset + Vector2.UnitX * 30, SmoothedGriddedPosition + Output.Offset + Vector2.UnitX * 5, 1.01f, Color.Black);
     }
     
-    DrawTextEx(GetFontDefault(), State.ToString().ToUpper(), GriddedPosition + TextOffset, 18, 1, Color.Black);
+    DrawTextEx(GetFontDefault(), State.ToString().ToUpper(), SmoothedGriddedPosition + TextOffset, 18, 1, Color.Black);
     
     if (AllowDrawBorder)
     {
