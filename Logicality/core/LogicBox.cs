@@ -273,7 +273,7 @@ public class LogicBox : IScript
   {
     // Checks whether it overlaps with any other box
     bool first = occ.Where(p => p.Key != this).Any(p =>
-      CheckCollisionRecs(new Rectangle(p.Value, 120, 100), RealRect));
+      CheckCollisionRecs(new Rectangle(p.Value, 120, 100), new Rectangle(RealRect.Position + Vector2.One * 7, RealRect.Size - Vector2.One * 14)));
     // Checks whether the box is NOT in scene boundaries (from RectSize to MapSize-RectSize*2)
     bool second = !CheckCollisionRecs(RealRect, new Rectangle(120, 100, Globals.MapSize - new Vector2(120, 100) * 2));
     
