@@ -6,7 +6,7 @@ public class SceneManager
 {
   public List<Scene> All { get; } = [];
   private string? _changeSceneTo { get; set; }
-  public Scene Current { get; private set; }
+  public Scene Current { get; private set; } = null!;
 
   public void Add(params Scene[] scenes) =>
     scenes.ToList().ForEach(s => All.Add(s));

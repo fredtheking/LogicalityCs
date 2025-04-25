@@ -26,10 +26,10 @@ public class MainScene : Scene
   }
   public override void Enter()
   {
-    Config.Camera.Offset = Config.Resolution / 2;
-    Config.Camera.Target = Config.MapSize / 2;
-    Config.Camera.Rotation = 0;
-    Config.Camera.Zoom = 1;
+    Globals.Camera.Offset = Globals.Resolution / 2;
+    Globals.Camera.Target = Globals.MapSize / 2;
+    Globals.Camera.Rotation = 0;
+    Globals.Camera.Zoom = 1;
     CameraZoom = 1;
     
     PlaceSound = LoadSound("assets/sounds/place.ogg");
@@ -41,10 +41,10 @@ public class MainScene : Scene
   }
   public override void Leave()
   {
-    Config.Camera.Offset = Vector2.Zero;
-    Config.Camera.Target = Vector2.Zero;
-    Config.Camera.Rotation = 0;
-    Config.Camera.Zoom = 1;
+    Globals.Camera.Offset = Vector2.Zero;
+    Globals.Camera.Target = Vector2.Zero;
+    Globals.Camera.Rotation = 0;
+    Globals.Camera.Zoom = 1;
     
     UnloadSound(PlaceSound!.Value);
     PlaceSound = null;
@@ -59,7 +59,7 @@ public class MainScene : Scene
   {
     Selector.Update();
     if (IsMouseButtonPressed(MouseButton.Right))
-      if (LogicBox.Create(new LogicBox(Selector.Pick(), GetScreenToWorld2D(GetMousePosition(), Config.Camera) - new Vector2(60, 50))))
+      if (LogicBox.Create(new LogicBox(Selector.Pick(), GetScreenToWorld2D(GetMousePosition(), Globals.Camera) - new Vector2(60, 50))))
       {
         RotationShock = 1;
         PlaySound(PlaceSound!.Value);
@@ -89,10 +89,10 @@ public class MainScene : Scene
     int step = 20;
     float intensity = 2f;
     Color purpa = new(58, 30, 54, 255);
-    for (int i = 0; i < Config.MapSize.X / step + 1; ++i)
-      DrawLineV(new Vector2((float)(i * step + Math.Sin(GetTime()*2) * intensity), 0), Config.MapSize with { X = (float)(i * step + Math.Sin(GetTime()*1.2f) * intensity) }, purpa);
-    for (int i = 0; i < Config.MapSize.Y / step + 1; ++i)
-      DrawLineV(new Vector2(0, (float)(i * step + Math.Sin(GetTime()*1.2f) * intensity)), Config.MapSize with { Y = (float)(i * step + Math.Sin(GetTime()*2) * intensity) }, purpa);
+    for (int i = 0; i < Globals.MapSize.X / step + 1; ++i)
+      DrawLineV(new Vector2((float)(i * step + Math.Sin(GetTime()*2) * intensity), 0), Globals.MapSize with { X = (float)(i * step + Math.Sin(GetTime()*1.2f) * intensity) }, purpa);
+    for (int i = 0; i < Globals.MapSize.Y / step + 1; ++i)
+      DrawLineV(new Vector2(0, (float)(i * step + Math.Sin(GetTime()*1.2f) * intensity)), Globals.MapSize with { Y = (float)(i * step + Math.Sin(GetTime()*2) * intensity) }, purpa);
   }
 
   private void CameraShakeHandle()
@@ -100,7 +100,7 @@ public class MainScene : Scene
     if (RotationShock > 0) RotationShock -= 5 * GetFrameTime();
     if (RotationShock < 0) RotationShock = 0;
     
-    Config.Camera.Rotation = (float)((new Random().NextDouble() * 2 - 1) * RotationShock);
+    Globals.Camera.Rotation = (float)((new Random().NextDouble() * 2 - 1) * RotationShock);
   }
 
   private void ChangeSelectorFromNumbers()
@@ -113,12 +113,12 @@ public class MainScene : Scene
   private void MoveCamera()
   {
     if (IsMouseButtonDown(MouseButton.Middle) && !IsMouseButtonDown(MouseButton.Left))
-      Config.Camera.Target -= GetMouseDelta() / Config.Camera.Zoom;
+      Globals.Camera.Target -= GetMouseDelta() / Globals.Camera.Zoom;
     CameraZoom += GetMouseWheelMoveV().Y * 0.1f;
     CameraZoom = Math.Clamp(CameraZoom, 0.4f, 5f);
     
-    Config.Camera.Zoom = Raymath.Lerp(Config.Camera.Zoom, CameraZoom, 16f * GetFrameTime());
-    Config.Camera.Target.X = Math.Clamp(Config.Camera.Target.X, 0, Config.MapSize.X);
-    Config.Camera.Target.Y = Math.Clamp(Config.Camera.Target.Y, 0, Config.MapSize.Y);
+    Globals.Camera.Zoom = Raymath.Lerp(Globals.Camera.Zoom, CameraZoom, 16f * GetFrameTime());
+    Globals.Camera.Target.X = Math.Clamp(Globals.Camera.Target.X, 0, Globals.MapSize.X);
+    Globals.Camera.Target.Y = Math.Clamp(Globals.Camera.Target.Y, 0, Globals.MapSize.Y);
   }
 }

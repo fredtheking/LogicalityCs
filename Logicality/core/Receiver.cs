@@ -2,6 +2,7 @@ using System.Numerics;
 using Logicality.utils;
 using Logicality.utils.interfaces;
 using Raylib_cs;
+using Steamworks;
 using static Raylib_cs.Raylib;
 
 namespace Logicality.core;
@@ -55,7 +56,7 @@ public class Receiver : IScript
       if (Parent.Output is not null) OtherReceivers.Remove(Parent.Output);
       foreach (Receiver receiver in OtherReceivers)
       {
-        if (CheckCollisionPointRec(GetScreenToWorld2D(GetMousePosition(), Config.Camera), receiver.Hitbox.Rect))
+        if (CheckCollisionPointRec(GetScreenToWorld2D(GetMousePosition(), Globals.Camera), receiver.Hitbox.Rect))
         {
           Console.WriteLine("FOUND MY DAD!!");
           break;
@@ -68,7 +69,7 @@ public class Receiver : IScript
   {
     if (StartedDragging && Wire is null)
     {
-      DrawLineBezier(Parent.SmoothedGriddedPosition + StartWireOffset, GetScreenToWorld2D(GetMousePosition(), Config.Camera), 2, Color.RayWhite);
+      DrawLineBezier(Parent.SmoothedGriddedPosition + StartWireOffset, GetScreenToWorld2D(GetMousePosition(), Globals.Camera), 2, Color.RayWhite);
     }
     Hitbox.Render();
   }

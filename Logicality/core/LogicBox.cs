@@ -169,7 +169,7 @@ public class LogicBox : IScript
       Selected = Hitbox!.Drag[(int)MouseButton.Left];
       if (Selected)
       {
-        RealRect.Position += GetMouseDelta() / Config.Camera.Zoom;
+        RealRect.Position += GetMouseDelta() / Globals.Camera.Zoom;
 
         if (!GridsIntersects(Occipied))
         {
@@ -275,7 +275,7 @@ public class LogicBox : IScript
     bool first = occ.Where(p => p.Key != this).Any(p =>
       CheckCollisionRecs(new Rectangle(p.Value, 120, 100), RealRect));
     // Checks whether the box is NOT in scene boundaries (from RectSize to MapSize-RectSize*2)
-    bool second = !CheckCollisionRecs(RealRect, new Rectangle(120, 100, Config.MapSize - new Vector2(120, 100) * 2));
+    bool second = !CheckCollisionRecs(RealRect, new Rectangle(120, 100, Globals.MapSize - new Vector2(120, 100) * 2));
     
     // Both of them are "invalid position", so either of them should be true
     return first || second;

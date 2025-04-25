@@ -30,7 +30,7 @@ public class Hitbox : IScript
   public void Update()
   {
     
-    Hover = CheckCollisionPointRec(OverlayHitbox ? GetMousePosition() : GetScreenToWorld2D(GetMousePosition(), Config.Camera), Rect);
+    Hover = CheckCollisionPointRec(OverlayHitbox ? GetMousePosition() : GetScreenToWorld2D(GetMousePosition(), Globals.Camera), Rect);
     for (int i = 0; i < 3; i++)
     {
       Click[i] = IsMouseButtonPressed((MouseButton)i);
@@ -44,7 +44,7 @@ public class Hitbox : IScript
 
   public void Render()
   {
-    if (Config.Debug)
+    if (Globals.Debug)
       DrawRectangleRec(Rect, Color);
   }
   
