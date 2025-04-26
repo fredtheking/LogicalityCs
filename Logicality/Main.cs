@@ -31,7 +31,7 @@ sceneManager.ActualChange(true);
 Console.WriteLine(SteamAPI.IsSteamRunning());
 
 // RESOURCES LOAD
-Globals.VolumePitch = LoadSound("assets/sounds/click.ogg");
+Globals.VolumePitchSound = LoadSound("assets/sounds/click.ogg");
 
 
 // MAIN LOOP
@@ -41,9 +41,11 @@ while (!WindowShouldClose())
   sceneManager.Current.Update();
   // GLOBAL-UPDATE
   VolumeUtils.Update();
-  MusicUtils.Update();
+  if (Globals.Volume > 0)MusicUtils.Update();
   if (IsKeyPressed(KeyboardKey.F3) || IsKeyPressed(KeyboardKey.Grave))
     Globals.Debug = !Globals.Debug;
+  if (IsKeyPressed(KeyboardKey.F4))
+    MusicUtils.RollNew();
   if (IsKeyPressed(KeyboardKey.F1))
     sceneManager.Previous();
   else if (IsKeyPressed(KeyboardKey.F2))

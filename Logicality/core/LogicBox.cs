@@ -149,7 +149,7 @@ public class LogicBox : IScript
 
   public void Update()
   {
-    SmoothedGriddedPosition = Vector2.Lerp(SmoothedGriddedPosition, GriddedPosition, 16f * GetFrameTime());
+    SmoothedGriddedPosition = Vector2.Lerp(SmoothedGriddedPosition, GriddedPosition, 20f * GetFrameTime());
     if (DestroyCheck()) return;
     
     Occipied[this] = GriddedPosition;
@@ -271,11 +271,13 @@ public class LogicBox : IScript
   
   private bool GridsIntersects(Dictionary<LogicBox, Vector2> occ)
   {
+    Rectangle smallerRect = new(RealRect.Position + Vector2.One * 10, RealRect.Size - Vector2.One * 20);
+    
     // Checks whether it overlaps with any other box
     bool first = occ.Where(p => p.Key != this).Any(p =>
-      CheckCollisionRecs(new Rectangle(p.Value, 120, 100), new Rectangle(RealRect.Position + Vector2.One * 7, RealRect.Size - Vector2.One * 14)));
+      CheckCollisionRecs(new Rectangle(p.Value, 120, 100), smallerRect));
     // Checks whether the box is NOT in scene boundaries (from RectSize to MapSize-RectSize*2)
-    bool second = !CheckCollisionRecs(RealRect, new Rectangle(120, 100, Globals.MapSize - new Vector2(120, 100) * 2));
+    bool second = !CheckCollisionRecs(smallerRect, new Rectangle(100, 80, Globals.MapSize - new Vector2(100, 80) * 2));
     
     // Both of them are "invalid position", so either of them should be true
     return first || second;
