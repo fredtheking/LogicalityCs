@@ -18,6 +18,7 @@ public class Receiver : IScript
   public LogicBox? Parent { get; set; }
   public WireLine? Wire { get; set; }
   public Hitbox Hitbox { get; set; }
+  public event Action? ConnectionEstablishedTrigger;
   
   public Receiver(LogicBox parent, Vector2 offset, Vector2 startWireOffset, bool isOutput) 
   {
@@ -66,6 +67,7 @@ public class Receiver : IScript
           Connector = receiver;
           receiver.Connector = this;
           Wire = receiver.Wire = new WireLine(IsOutput ? this : receiver, IsOutput ? receiver : this);
+          ConnectionEstablishedTrigger?.Invoke();
           
           break;
         }
@@ -77,21 +79,36 @@ public class Receiver : IScript
 
   public void Render()
   {
-    if (State) DrawCircleGradient((int)(Parent.SmoothedGriddedPosition.X + Offset.X), (int)(Parent.SmoothedGriddedPosition.Y + Offset.Y), 7, Color.DarkGreen, new Color(255, 255, 255, 36));
-    DrawCircleV(Parent.SmoothedGriddedPosition + Offset, 5, State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
-    DrawRectangleRoundedLinesEx(new Rectangle(Parent.SmoothedGriddedPosition + Offset - Vector2.One * 5, 10, 10), 1, 10, 1.01f, Color.Black);
+    if (State) DrawCircleV(Parent!.SmoothedGriddedPosition + Offset, 7, new Color(255, 255, 255, 36));
+    
+    Vector2 ConnectionSpace = Connector is not null ? Vector2.UnitX : Vector2.Zero;
+    Color HalfBlack = new Color(0, 0, 0, 100);
     if (IsOutput)
-      DrawLineEx(Parent.SmoothedGriddedPosition + Offset + Vector2.UnitX * 30, Parent.SmoothedGriddedPosition + Offset + Vector2.UnitX * 5, 1.01f, Color.Black);
+    {
+      DrawLineEx(Parent!.SmoothedGriddedPosition + Offset + Vector2.UnitX * 29 + ConnectionSpace, Parent.SmoothedGriddedPosition + Offset + Vector2.UnitX * 5, 4, Color.Black);
+      DrawLineEx(Parent.SmoothedGriddedPosition + Offset + Vector2.UnitX * 29 + ConnectionSpace, Parent.SmoothedGriddedPosition + Offset + Vector2.UnitX * 5, 2, State ? Color.RayWhite : Parent.Color);
+      if (!State)
+        DrawRectangleGradientEx(new Rectangle(Parent!.SmoothedGriddedPosition + Offset + Vector2.UnitX * 5 - Vector2.UnitY + ConnectionSpace, 24, 2), HalfBlack, HalfBlack, Color.DarkGray, Color.DarkGray);
+    }
     else
-      DrawLineEx(Parent.SmoothedGriddedPosition + Offset - Vector2.UnitX * 30, Parent.SmoothedGriddedPosition + Offset - Vector2.UnitX * 5, 1.01f, Color.Black);
+    {
+      DrawLineEx(Parent!.SmoothedGriddedPosition + Offset - Vector2.UnitX * 29 - ConnectionSpace, Parent.SmoothedGriddedPosition + Offset - Vector2.UnitX * 5, 4, Color.Black);
+      DrawLineEx(Parent.SmoothedGriddedPosition + Offset - Vector2.UnitX * 29 - ConnectionSpace, Parent.SmoothedGriddedPosition + Offset - Vector2.UnitX * 5, 2, State ? Color.RayWhite : Parent.Color);
+      if (!State)
+        DrawRectangleGradientEx(new Rectangle(Parent!.SmoothedGriddedPosition + Offset - Vector2.UnitX * 29 - Vector2.UnitY - ConnectionSpace, 24 + ConnectionSpace.X, 2), Color.DarkGray, Color.DarkGray, HalfBlack, HalfBlack);
+    }
     
     if (StartedDragging && Wire is null)
     {
+      Console.WriteLine(Random.Shared.Next());
       DrawLineBezier(Parent.SmoothedGriddedPosition + StartWireOffset, GetScreenToWorld2D(GetMousePosition(), Globals.Camera), 4, new Color(0, 0, 0, 100));
       DrawLineBezier(Parent.SmoothedGriddedPosition + StartWireOffset, GetScreenToWorld2D(GetMousePosition(), Globals.Camera), 2, new Color(245, 245, 245, 100));
     }
     
-    if (Parent is not null && Connector?.Parent is not null)
+    DrawCircleV(Parent.SmoothedGriddedPosition + Offset, 5, State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
+    DrawRectangleRoundedLinesEx(new Rectangle(Parent.SmoothedGriddedPosition + Offset - Vector2.One * 5, 10, 10), 1, 10, 1.01f, Color.Black);
+    
+    if (Parent is not null && Connector?.Parent is not null && !BoxesTooClose())
       Wire!.Render();
     
     Hitbox.Render();
@@ -106,5 +123,13 @@ public class Receiver : IScript
   private void PlayInteractionSound()
   {
     PlaySound(Globals.InteractionSetSound!.Value);
+  }
+
+  private bool BoxesTooClose()
+  {
+    Vector2 thisPos = Parent!.SmoothedGriddedPosition;
+    Vector2 connectorPos = Connector!.Parent!.SmoothedGriddedPosition;
+
+    return thisPos.X - connectorPos.X is >= -121 and <= 121 && Math.Abs(thisPos.Y - connectorPos.Y) < 1;
   }
 }

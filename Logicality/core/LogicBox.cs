@@ -14,10 +14,13 @@ public class LogicBox : IScript
   public Rectangle RealRect;
   public Vector2 GriddedPosition;
   public Vector2 SmoothedGriddedPosition;
-  public Rectangle DragRectOffset;
-  public Rectangle? SwitchRectOffset;
   public Vector2 CenterOffset;
   public Vector2 TextOffset;
+
+  public static event Action<LogicBox>? AdditionalInit;
+  public Button DragButton { get; init; }
+  public Button? SwitchButton { get; init; }
+  public bool SwitchState { get; private set; } = true;
   
   public Receiver?[] Receivers = new Receiver[3];
 
@@ -25,11 +28,8 @@ public class LogicBox : IScript
   public bool Destroy { get; private set; }
   public bool Inactive { get; init; }
   public LogicStates State { get; private set; }
-  public Hitbox? SwitchButtonHitbox { get; private set; }
-  public Hitbox? Hitbox { get; private set; }
   public Hitbox? DeletionHitbox { get; private set; }
   public Color Color { get; init; }
-  public bool Selected { get; private set; }
   public int StartedDragging { get; set; }
   
   public LogicBox(LogicStates state, Vector2 position, bool defaultInactive = false)
@@ -47,7 +47,7 @@ public class LogicBox : IScript
     Inactive = defaultInactive;
     Color = state switch
     {
-      LogicStates.Wire => Color.LightGray,
+      LogicStates.Switch => Color.LightGray,
       LogicStates.Not => Color.Red,
       LogicStates.And => Color.Lime,
       LogicStates.Or => Color.Yellow,
@@ -59,12 +59,16 @@ public class LogicBox : IScript
     
     CenterOffset = RealRect.Size / 2 - Vector2.UnitY * 14;
     TextOffset = CenterText();
-    DragRectOffset = new Rectangle(CenterOffset - new Vector2(50, 20), new Vector2(100, 40));
+    DragButton = new Button(this, CenterOffset - new Vector2(50, 20), new Vector2(100, 40), !Inactive);
     if (!Inactive)
     {
-      Hitbox = new Hitbox(new Rectangle(position + DragRectOffset.Position, DragRectOffset.Size));
-      DeletionHitbox = new Hitbox(new Rectangle(GriddedPosition, RealRect.Size));
-      DeletionHitbox.Color = new Color(0, 0, 255, 100);
+      DeletionHitbox = new Hitbox(new Rectangle(GriddedPosition, RealRect.Size)) 
+        { Color = new Color(0, 0, 255, 100) };
+    }
+    if (State is LogicStates.Switch)
+    {
+      SwitchButton = new Button(this, new Vector2(44, CenterOffset.Y + 28), new Vector2(34, 28));
+      DetermineSwitchColor();
     }
 
     if (State is not LogicStates.Battery)
@@ -86,27 +90,17 @@ public class LogicBox : IScript
       Receivers[2] = new Receiver(this, offset, offset + Vector2.UnitX * 30, true);
     }
 
-    if (Receivers[0] is not null && State is LogicStates.Wire or LogicStates.Not or LogicStates.Receive)
+    if (Receivers[0] is not null && State is LogicStates.Switch or LogicStates.Not or LogicStates.Receive)
       Receivers[0]!.Offset.Y = Receivers[2]?.Offset.Y ?? CenterOffset.Y + 41;
-
-    if (State is LogicStates.Wire)
-    {
-      SwitchRectOffset = new Rectangle(new Vector2(44, CenterOffset.Y + 28), 34, 28);
-      SwitchButtonHitbox = new Hitbox(new Rectangle(GriddedPosition + SwitchRectOffset.Value.Position, SwitchRectOffset.Value.Size));
-    }
   }
 
   public static bool Create(LogicBox box)
   {
-    if (!box.Destroy)
-    {
-      box.Init();
-      //Receiver.Receivers.Concat(box.Receivers).Where(p => p is not null).ToList();
-      Boxes.Add(box);
-      Occipied.Add(box, box.GriddedPosition);
-      return true;
-    }
-    return false;
+    if (box.Destroy) return false;
+    box.Init();
+    Boxes.Add(box);
+    Occipied.Add(box, box.GriddedPosition);
+    return true;
   }
 
   private Vector2 CenterText()
@@ -118,24 +112,25 @@ public class LogicBox : IScript
   public void Init()
   {
     SmoothedGriddedPosition = GriddedPosition - GetMouseDelta();
-    Hitbox?.Init(); SwitchButtonHitbox?.Init(); DeletionHitbox?.Init();
+    DragButton.Init(); SwitchButton?.Init(); DeletionHitbox?.Init();
     foreach (Receiver receiver in Receivers)
       receiver?.Init();
     if (State is LogicStates.Battery)
       Receivers[2]!.State = true;
     GridEtc();
+    AdditionalInit?.Invoke(this);
   }
 
   public void Enter()
   {
-    Hitbox?.Enter(); SwitchButtonHitbox?.Enter(); DeletionHitbox?.Enter();
+    DragButton.Enter(); SwitchButton?.Enter(); DeletionHitbox?.Enter();
     foreach (Receiver receiver in Receivers)
       receiver?.Enter();
   }
   
   public void Leave()
   {
-    Hitbox?.Leave(); SwitchButtonHitbox?.Leave(); DeletionHitbox?.Leave();
+    DragButton.Leave(); SwitchButton?.Leave(); DeletionHitbox?.Leave();
     foreach (Receiver receiver in Receivers)
       receiver?.Leave();
 
@@ -146,9 +141,6 @@ public class LogicBox : IScript
   private bool DestroyCheck()
   {
     if (!Destroy) return false;
-    //if (Input1 != null) Receiver.Receivers.Remove(Input1);
-    //if (Input2 != null) Receiver.Receivers.Remove(Input2);
-    //if (Output != null) Receiver.Receivers.Remove(Output);
     Occipied.Remove(this);
     Boxes.Remove(this);
     foreach (Receiver receiver in Receivers.Where(x => x is not null))
@@ -162,14 +154,14 @@ public class LogicBox : IScript
     if (DestroyCheck()) return;
     
     Occipied[this] = GriddedPosition;
-    Hitbox?.Update(); SwitchButtonHitbox?.Update(); DeletionHitbox?.Update();
+    DragButton.Update(); SwitchButton?.Update(); DeletionHitbox?.Update();
     foreach (Receiver receiver in Receivers)
       receiver?.Update();
 
     if (Receivers[2] is not null)
       Receivers[2]!.State = State switch
       {
-        LogicStates.Wire => Receivers[0]!.State,
+        LogicStates.Switch when SwitchState => Receivers[0]!.State,
         LogicStates.Not => !Receivers[0]!.State,
         LogicStates.And => Receivers[0]!.State && Receivers[1]!.State,
         LogicStates.Or => Receivers[0]!.State || Receivers[1]!.State,
@@ -177,50 +169,56 @@ public class LogicBox : IScript
         LogicStates.Battery => true,
         _ => false
       };
-    
-    if (!Inactive)
+
+    if (SwitchButton is not null)
     {
-      Selected = Hitbox!.Drag[(int)MouseButton.Left];
-
-      switch (Selected)
+      if (SwitchButton.Hitbox!.Press[(int)MouseButton.Left])
       {
-        // Deletion
-        case false when DeletionHitbox!.Press[(int)MouseButton.Right]:
-          Destroy = true;
-          return;
-        // Selection
-        case true:
-        {
-          RealRect.Position += GetMouseDelta() / Globals.Camera.Zoom;
-
-          if (!GridsIntersects(Occipied))
-          {
-            AllowDrawBorder = false;
-            GridPosition();
-            GridEtc();
-          }
-          else
-          {
-            AllowDrawBorder = true;
-          }
-
-          break;
-        }
-        default:
-          AllowDrawBorder = false;
-          RealRect.Position = GriddedPosition;
-          break;
+        PlaySound(Globals.InteractionSetSound!.Value);
+        SwitchState = !SwitchState;
+        DetermineSwitchColor();
       }
-
-      // Wires
-      if (StartedDragging > 0 || Selected)
-      {
-        Boxes.Remove(this);
-        Boxes.Add(this);
-      }
-
-      StartedDragging = 0;
     }
+
+    if (Inactive) return;
+    switch (DragButton.Selected)
+    {
+      // Deletion
+      case false when DeletionHitbox!.Press[(int)MouseButton.Right]:
+        Destroy = true;
+        return;
+      // Selection
+      case true:
+      {
+        RealRect.Position += GetMouseDelta() / Globals.Camera.Zoom;
+
+        if (!GridsIntersects(Occipied))
+        {
+          AllowDrawBorder = false;
+          GridPosition();
+          GridEtc();
+        }
+        else
+        {
+          AllowDrawBorder = true;
+        }
+
+        break;
+      }
+      default:
+        AllowDrawBorder = false;
+        RealRect.Position = GriddedPosition;
+        break;
+    }
+
+    // Wires
+    if (StartedDragging > 0 || DragButton.Selected)
+    {
+      Boxes.Remove(this);
+      Boxes.Add(this);
+    }
+
+    StartedDragging = 0;
   }
 
   public void Render()
@@ -229,15 +227,8 @@ public class LogicBox : IScript
     DrawRectangleRec(griddedRectangle, Color);
     if (Inactive) DrawRectangleLinesEx(new Rectangle(griddedRectangle.Position - Vector2.One * 1, griddedRectangle.Size + Vector2.One * 2), 2, Color.Yellow);
     DrawRectangleLinesEx(griddedRectangle, 1, Color.Black);
-
-    Rectangle selectionRect = new(SmoothedGriddedPosition + DragRectOffset.Position, DragRectOffset.Size);
-    DrawRectangleRec(selectionRect, Selected && !Inactive ? new Color(240, 240, 255,255) : Color.White);
-    if (!Inactive && Hitbox!.Hover && Selected)
-      DrawRectangleLinesEx(selectionRect, 2, Color.DarkBlue);
-    else if (!Inactive && Hitbox!.Hover && !Selected)
-      DrawRectangleLinesEx(selectionRect, 2, Color.Blue);
-    else
-      DrawRectangleLinesEx(selectionRect, 1, Color.Black);
+    
+    DeletionHitbox?.Render(); DragButton.Render(); SwitchButton?.Render();
     
     DrawTextEx(GetFontDefault(), State.ToString().ToUpper(), SmoothedGriddedPosition + TextOffset, 18, 1, Color.Black);
     
@@ -251,8 +242,6 @@ public class LogicBox : IScript
       DrawRectangleLinesEx(RealRect, 2, Color.DarkGray);
       DrawRectangleLinesEx(RealRect, 1, Color);
     }
-    
-    DeletionHitbox?.Render(); SwitchButtonHitbox?.Render(); Hitbox?.Render();
   }
 
   private void GridEtc()
@@ -260,9 +249,9 @@ public class LogicBox : IScript
     if (!Inactive)
     {
       DeletionHitbox!.Rect.Position = GriddedPosition;
-      Hitbox!.Rect.Position = GriddedPosition + DragRectOffset.Position;
-      if (SwitchButtonHitbox is not null)
-        SwitchButtonHitbox!.Rect.Position = GriddedPosition + SwitchRectOffset!.Value.Position;
+      DragButton.Hitbox!.Rect.Position = GriddedPosition + DragButton.Offset;
+      if (SwitchButton is not null)
+        SwitchButton.Hitbox!.Rect.Position = GriddedPosition + SwitchButton.Offset;
     }
     foreach (Receiver receiver in Receivers)
       if (receiver is not null)
@@ -289,5 +278,20 @@ public class LogicBox : IScript
     
     // Both of them are "invalid position", so either of them should be true
     return first || second;
+  }
+
+  private void DetermineSwitchColor()
+  {
+    switch (SwitchState)
+    {
+      case true:
+        SwitchButton.BgColor = Color.Green;
+        SwitchButton.SelectBgColor = new Color(0, 174, 22, 255);
+        break;
+      case false:
+        SwitchButton.BgColor = new Color(190, 0, 0, 255);
+        SwitchButton.SelectBgColor = new Color(160, 0, 0, 255);
+        break;
+    }
   }
 }

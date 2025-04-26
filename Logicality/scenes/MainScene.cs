@@ -12,13 +12,25 @@ public class MainScene : Scene
   
   public LogicBoxSelector Selector = new();
   public List<LogicBox> FinalBoxes = [];
-  public float RotationShock = 0;
+  public float RotationShock;
+  public Sound? UnplugSound;
+  public Sound? PlugSound;
   public Sound? PlaceSound;
   public Sound? DisappearSound;
   public float CameraZoom = 1;
   
   public override void Init()
   {
+    LogicBox.AdditionalInit += box =>
+    {
+      foreach (Receiver receiver in box.Receivers.Where(x => x is not null).Cast<Receiver>())
+        receiver.ConnectionEstablishedTrigger += () =>
+        {
+          RotationShock = .46f; 
+          PlaySound(PlugSound!.Value);
+          receiver.Wire!.DestroyTrigger += () => PlaySound(UnplugSound!.Value);
+        };
+    };
     Selector.Init();
     foreach (LogicBox box in LogicBox.Boxes)
       box.Init();
@@ -31,7 +43,9 @@ public class MainScene : Scene
     Globals.Camera.Rotation = 0;
     Globals.Camera.Zoom = 1;
     CameraZoom = 1;
-    
+
+    PlugSound = LoadSound("assets/sounds/plug.ogg");
+    UnplugSound = LoadSound("assets/sounds/unplug.ogg");
     PlaceSound = LoadSound("assets/sounds/place.ogg");
     DisappearSound = LoadSound("assets/sounds/disappear.ogg");
     
@@ -47,6 +61,10 @@ public class MainScene : Scene
     Globals.Camera.Zoom = 1;
     RotationShock = 0;
     
+    UnloadSound(PlugSound!.Value);
+    PlugSound = null;
+    UnloadSound(UnplugSound!.Value);
+    UnplugSound = null;
     UnloadSound(PlaceSound!.Value);
     PlaceSound = null;
     UnloadSound(DisappearSound!.Value);

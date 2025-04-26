@@ -8,6 +8,7 @@ namespace Logicality.core;
 public record WireLine(Receiver From, Receiver To) : IScript
 {
   public bool Drawed { private get; set; }
+  public event Action? DestroyTrigger;
   
   public void Init() { }
   public void Enter() { }
@@ -25,6 +26,7 @@ public record WireLine(Receiver From, Receiver To) : IScript
     From.Wire = To.Wire = null;
     From.Connector = To.Connector = null;
     To.State = false;
+    DestroyTrigger?.Invoke();
   }
 
   public void Render()

@@ -7,7 +7,7 @@ namespace Logicality.core;
 
 public class LogicBoxSelector : IScript
 {
-  private string[] Names = ["W", "N", "A", "O", "X", "B", "R"];
+  private string[] Names = ["S", "N", "A", "O", "X", "B", "R"];
   List<SelectorOption> Options = [];
 
   public int Selected
@@ -56,7 +56,7 @@ public class LogicBoxSelector : IScript
   {
     return Options[Selected].Name switch
     {
-      "W" => LogicStates.Wire,
+      "S" => LogicStates.Switch,
       "N" => LogicStates.Not,
       "A" => LogicStates.And,
       "O" => LogicStates.Or,

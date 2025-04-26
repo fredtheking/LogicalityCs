@@ -2,7 +2,7 @@ namespace Logicality.core;
 
 public enum LogicStates
 {
-  Wire,
+  Switch,
   Not,
   And,
   Or,
