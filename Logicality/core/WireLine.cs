@@ -15,6 +15,7 @@ public record WireLine(Receiver From, Receiver To) : IScript
 
   public void Update()
   {
+    To.State = From.State;
     if (From.Parent is null || To.Parent is null) 
       Destroy();
   }
@@ -23,13 +24,14 @@ public record WireLine(Receiver From, Receiver To) : IScript
   {
     From.Wire = To.Wire = null;
     From.Connector = To.Connector = null;
+    To.State = false;
   }
 
   public void Render()
   {
     if (Drawed) return;
-    DrawLineBezier(From.Parent.SmoothedGriddedPosition + From.StartWireOffset, To.Parent.SmoothedGriddedPosition + To.StartWireOffset, 4, Color.Black);
-    DrawLineBezier(From.Parent.SmoothedGriddedPosition + From.StartWireOffset, To.Parent.SmoothedGriddedPosition + To.StartWireOffset, 2, Color.RayWhite);
+    DrawLineBezier(From.Parent!.SmoothedGriddedPosition + From.StartWireOffset, To.Parent!.SmoothedGriddedPosition + To.StartWireOffset, 4, Color.Black);
+    DrawLineBezier(From.Parent.SmoothedGriddedPosition + From.StartWireOffset, To.Parent.SmoothedGriddedPosition + To.StartWireOffset, 2, From.State ? Color.RayWhite : Color.DarkGray);
     Drawed = true;
   }
 }

@@ -15,6 +15,7 @@ public class LogicBox : IScript
   public Vector2 GriddedPosition;
   public Vector2 SmoothedGriddedPosition;
   public Rectangle DragRectOffset;
+  public Rectangle? SwitchRectOffset;
   public Vector2 CenterOffset;
   public Vector2 TextOffset;
   
@@ -24,6 +25,7 @@ public class LogicBox : IScript
   public bool Destroy { get; private set; }
   public bool Inactive { get; init; }
   public LogicStates State { get; private set; }
+  public Hitbox? SwitchButtonHitbox { get; private set; }
   public Hitbox? Hitbox { get; private set; }
   public Hitbox? DeletionHitbox { get; private set; }
   public Color Color { get; init; }
@@ -86,6 +88,12 @@ public class LogicBox : IScript
 
     if (Receivers[0] is not null && State is LogicStates.Wire or LogicStates.Not or LogicStates.Receive)
       Receivers[0]!.Offset.Y = Receivers[2]?.Offset.Y ?? CenterOffset.Y + 41;
+
+    if (State is LogicStates.Wire)
+    {
+      SwitchRectOffset = new Rectangle(new Vector2(44, CenterOffset.Y + 28), 34, 28);
+      SwitchButtonHitbox = new Hitbox(new Rectangle(GriddedPosition + SwitchRectOffset.Value.Position, SwitchRectOffset.Value.Size));
+    }
   }
 
   public static bool Create(LogicBox box)
@@ -110,7 +118,7 @@ public class LogicBox : IScript
   public void Init()
   {
     SmoothedGriddedPosition = GriddedPosition - GetMouseDelta();
-    Hitbox?.Init(); DeletionHitbox?.Init();
+    Hitbox?.Init(); SwitchButtonHitbox?.Init(); DeletionHitbox?.Init();
     foreach (Receiver receiver in Receivers)
       receiver?.Init();
     if (State is LogicStates.Battery)
@@ -120,14 +128,14 @@ public class LogicBox : IScript
 
   public void Enter()
   {
-    Hitbox?.Enter(); DeletionHitbox?.Enter();
+    Hitbox?.Enter(); SwitchButtonHitbox?.Enter(); DeletionHitbox?.Enter();
     foreach (Receiver receiver in Receivers)
       receiver?.Enter();
   }
   
   public void Leave()
   {
-    Hitbox?.Leave(); DeletionHitbox?.Leave();
+    Hitbox?.Leave(); SwitchButtonHitbox?.Leave(); DeletionHitbox?.Leave();
     foreach (Receiver receiver in Receivers)
       receiver?.Leave();
 
@@ -154,9 +162,21 @@ public class LogicBox : IScript
     if (DestroyCheck()) return;
     
     Occipied[this] = GriddedPosition;
-    Hitbox?.Update(); DeletionHitbox?.Update();
+    Hitbox?.Update(); SwitchButtonHitbox?.Update(); DeletionHitbox?.Update();
     foreach (Receiver receiver in Receivers)
       receiver?.Update();
+
+    if (Receivers[2] is not null)
+      Receivers[2]!.State = State switch
+      {
+        LogicStates.Wire => Receivers[0]!.State,
+        LogicStates.Not => !Receivers[0]!.State,
+        LogicStates.And => Receivers[0]!.State && Receivers[1]!.State,
+        LogicStates.Or => Receivers[0]!.State || Receivers[1]!.State,
+        LogicStates.Xor => Receivers[0]!.State ^ Receivers[1]!.State,
+        LogicStates.Battery => true,
+        _ => false
+      };
     
     if (!Inactive)
     {
@@ -232,7 +252,7 @@ public class LogicBox : IScript
       DrawRectangleLinesEx(RealRect, 1, Color);
     }
     
-    DeletionHitbox?.Render(); Hitbox?.Render();
+    DeletionHitbox?.Render(); SwitchButtonHitbox?.Render(); Hitbox?.Render();
   }
 
   private void GridEtc()
@@ -241,6 +261,8 @@ public class LogicBox : IScript
     {
       DeletionHitbox!.Rect.Position = GriddedPosition;
       Hitbox!.Rect.Position = GriddedPosition + DragRectOffset.Position;
+      if (SwitchButtonHitbox is not null)
+        SwitchButtonHitbox!.Rect.Position = GriddedPosition + SwitchRectOffset!.Value.Position;
     }
     foreach (Receiver receiver in Receivers)
       if (receiver is not null)

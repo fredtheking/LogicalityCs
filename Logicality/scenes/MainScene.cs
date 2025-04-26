@@ -100,7 +100,8 @@ public class MainScene : Scene
   private void CameraShakeHandle()
   {
     if (RotationShock > 0) RotationShock -= 5 * GetFrameTime();
-    if (RotationShock < 0) RotationShock = 0;
+    
+    RotationShock = Math.Clamp(RotationShock, 0, 1);
     
     Globals.Camera.Rotation = (float)((new Random().NextDouble() * 2 - 1) * RotationShock);
   }

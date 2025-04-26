@@ -44,6 +44,7 @@ public class Receiver : IScript
   {
     Hitbox.Update();
     Wire?.Update();
+    
     bool dragging = Hitbox.Drag[(int)MouseButton.Left];
     Parent!.StartedDragging += dragging ? 1 : 0;
     
@@ -64,7 +65,7 @@ public class Receiver : IScript
 
           Connector = receiver;
           receiver.Connector = this;
-          Wire = receiver.Wire = new WireLine(IsOutput ? receiver : this, IsOutput ? this : receiver);
+          Wire = receiver.Wire = new WireLine(IsOutput ? this : receiver, IsOutput ? receiver : this);
           
           break;
         }
@@ -86,8 +87,8 @@ public class Receiver : IScript
     
     if (StartedDragging && Wire is null)
     {
-      DrawLineBezier(Parent.SmoothedGriddedPosition + StartWireOffset, GetScreenToWorld2D(GetMousePosition(), Globals.Camera), 4, Color.DarkPurple);
-      DrawLineBezier(Parent.SmoothedGriddedPosition + StartWireOffset, GetScreenToWorld2D(GetMousePosition(), Globals.Camera), 2, Color.RayWhite);
+      DrawLineBezier(Parent.SmoothedGriddedPosition + StartWireOffset, GetScreenToWorld2D(GetMousePosition(), Globals.Camera), 4, new Color(0, 0, 0, 100));
+      DrawLineBezier(Parent.SmoothedGriddedPosition + StartWireOffset, GetScreenToWorld2D(GetMousePosition(), Globals.Camera), 2, new Color(245, 245, 245, 100));
     }
     
     if (Parent is not null && Connector?.Parent is not null)
