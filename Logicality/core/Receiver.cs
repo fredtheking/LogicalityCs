@@ -130,6 +130,6 @@ public class Receiver : IScript
     Vector2 thisPos = Parent!.SmoothedGriddedPosition;
     Vector2 connectorPos = Connector!.Parent!.SmoothedGriddedPosition;
 
-    return thisPos.X - connectorPos.X is >= -121 and <= 121 && Math.Abs(thisPos.Y - connectorPos.Y) < 1;
+    return thisPos.X - connectorPos.X is >= -121 and <= 121 && Math.Abs(thisPos.Y - connectorPos.Y) < 1 && Connector!.Parent!.State is LogicStates.Switch or LogicStates.Not or LogicStates.Receive or LogicStates.Battery;
   }
 }
