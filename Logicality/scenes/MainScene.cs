@@ -45,6 +45,7 @@ public class MainScene : Scene
     Globals.Camera.Target = Vector2.Zero;
     Globals.Camera.Rotation = 0;
     Globals.Camera.Zoom = 1;
+    RotationShock = 0;
     
     UnloadSound(PlaceSound!.Value);
     PlaceSound = null;
@@ -62,6 +63,7 @@ public class MainScene : Scene
       if (LogicBox.Create(new LogicBox(Selector.Pick(), GetScreenToWorld2D(GetMousePosition(), Globals.Camera) - new Vector2(60, 50))))
       {
         RotationShock = 1;
+        SetSoundPitch(PlaceSound!.Value, (float)(0.9f + (1.1f - 0.9f) * Random.Shared.NextDouble()));
         PlaySound(PlaceSound!.Value);
       }
 
@@ -107,7 +109,10 @@ public class MainScene : Scene
   {
     KeyboardKey keyPressed = (KeyboardKey)GetKeyPressed();
     if (keyPressed is >= KeyboardKey.One and <= KeyboardKey.Seven)
+    {
+      PlaySound(Globals.InteractionSetSound!.Value);
       Selector.Selected = keyPressed - KeyboardKey.One;
+    }
   }
 
   private void MoveCamera()

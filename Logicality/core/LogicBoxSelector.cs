@@ -1,3 +1,4 @@
+using Logicality.utils;
 using Logicality.utils.interfaces;
 using static Raylib_cs.Raylib;
 using Raylib_cs;
@@ -37,8 +38,11 @@ public class LogicBoxSelector : IScript
     for (int i = 0; i < Options.Count; i++)
     {
       Options[i].Update();
-      if (Options[i].Hitbox.Press[(int)MouseButton.Left]) 
+      if (Options[i].Hitbox.Press[(int)MouseButton.Left])
+      {
+        PlaySound(Globals.InteractionSetSound!.Value);
         Selected = i;
+      }
     }
   }
   public void Render()

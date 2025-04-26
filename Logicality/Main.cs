@@ -8,15 +8,14 @@ using Steamworks;
 // PRE-INITIALISATION
 try
 {
-  Console.WriteLine(SteamAPI.Init() ? "Steam API успешно инициализировано!" : "Steam API не инициализировано.");
+  Console.WriteLine(SteamAPI.Init() ? "Steam API initialised successfully!" : "Steam API not initialised.");
 }
 catch (Exception ex)
 {
   Console.WriteLine($"Steam API Error: {ex.Message}");
 }
 SceneManager sceneManager = new();
-sceneManager.Add(new MainScene());
-sceneManager.Add(new MenuScene());
+sceneManager.Add(new MainScene(), new MenuScene());
 sceneManager.Change(nameof(MainScene));
 
 // WINDOW SETUP
@@ -31,7 +30,7 @@ sceneManager.ActualChange(true);
 Console.WriteLine(SteamAPI.IsSteamRunning());
 
 // RESOURCES LOAD
-Globals.VolumePitchSound = LoadSound("assets/sounds/click.ogg");
+Globals.InteractionSetSound = LoadSound("assets/sounds/click.ogg");
 
 
 // MAIN LOOP
@@ -40,6 +39,7 @@ while (!WindowShouldClose())
   // UPDATE
   sceneManager.Current.Update();
   // GLOBAL-UPDATE
+  GC.Collect(0, GCCollectionMode.Optimized);
   VolumeUtils.Update();
   if (Globals.Volume > 0)MusicUtils.Update();
   if (IsKeyPressed(KeyboardKey.F3) || IsKeyPressed(KeyboardKey.Grave))
@@ -76,6 +76,9 @@ while (!WindowShouldClose())
   sceneManager.ActualChange();
 }
 
+sceneManager.Current.Leave();
+MusicUtils.Unload();
+UnloadSound(Globals.InteractionSetSound.Value);
 SteamAPI.Shutdown();
 CloseAudioDevice();
 CloseWindow();

@@ -9,14 +9,13 @@ namespace Logicality.core;
 
 public class Receiver : IScript
 {
-  public static List<Receiver> Receivers { get; } = [];
   public bool State { get; set; }
   public bool StartedDragging { get; set; }
   public bool IsOutput { get; set; }
   public Vector2 Offset;
   public Vector2 StartWireOffset;
   public Receiver? Connector { get; set; }
-  public LogicBox Parent { get; set; }
+  public LogicBox? Parent { get; set; }
   public WireLine? Wire { get; set; }
   public Hitbox Hitbox { get; set; }
   
@@ -44,33 +43,67 @@ public class Receiver : IScript
   public void Update()
   {
     Hitbox.Update();
+    Wire?.Update();
     bool dragging = Hitbox.Drag[(int)MouseButton.Left];
-    StartedDragging = dragging;
-    Parent.StartedDragging += dragging ? 1 : 0;
+    Parent!.StartedDragging += dragging ? 1 : 0;
+    
+    if (Hitbox.Press[(int)MouseButton.Left])
+      PlayInteractionSound();
 
-    if (Hitbox.Release[(int)MouseButton.Left])
+    if (Hitbox.Release[(int)MouseButton.Left] && StartedDragging)
     {
-      List<Receiver> OtherReceivers = new(Receivers);
-      if (Parent.Input1 is not null) OtherReceivers.Remove(Parent.Input1);
-      if (Parent.Input2 is not null) OtherReceivers.Remove(Parent.Input2);
-      if (Parent.Output is not null) OtherReceivers.Remove(Parent.Output);
+      if (Hitbox.Hover)
+        PlayInteractionSound();
+      List<Receiver> OtherReceivers = LogicBox.Boxes.Where(x => x != Parent).SelectMany(x => x.Receivers).Where(x => x is not null).Cast<Receiver>().ToList();
+      
       foreach (Receiver receiver in OtherReceivers)
       {
-        if (CheckCollisionPointRec(GetScreenToWorld2D(GetMousePosition(), Globals.Camera), receiver.Hitbox.Rect))
+        if (receiver.IsOutput != IsOutput && Wire is null && Connector is null && receiver.Wire is null && receiver.Connector is null && CheckCollisionPointRec(GetScreenToWorld2D(GetMousePosition(), Globals.Camera), receiver.Hitbox.Rect))
         {
-          Console.WriteLine("FOUND MY DAD!!");
+          Console.WriteLine($"FOUND - Parent: {Parent.GriddedPosition}, Receiver: {receiver.StartWireOffset}");
+
+          Connector = receiver;
+          receiver.Connector = this;
+          Wire = receiver.Wire = new WireLine(IsOutput ? receiver : this, IsOutput ? this : receiver);
+          
           break;
         }
       }
     }
+    
+    StartedDragging = dragging;
   }
 
   public void Render()
   {
+    if (State) DrawCircleGradient((int)(Parent.SmoothedGriddedPosition.X + Offset.X), (int)(Parent.SmoothedGriddedPosition.Y + Offset.Y), 7, Color.DarkGreen, new Color(255, 255, 255, 36));
+    DrawCircleV(Parent.SmoothedGriddedPosition + Offset, 5, State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
+    DrawRectangleRoundedLinesEx(new Rectangle(Parent.SmoothedGriddedPosition + Offset - Vector2.One * 5, 10, 10), 1, 10, 1.01f, Color.Black);
+    if (IsOutput)
+      DrawLineEx(Parent.SmoothedGriddedPosition + Offset + Vector2.UnitX * 30, Parent.SmoothedGriddedPosition + Offset + Vector2.UnitX * 5, 1.01f, Color.Black);
+    else
+      DrawLineEx(Parent.SmoothedGriddedPosition + Offset - Vector2.UnitX * 30, Parent.SmoothedGriddedPosition + Offset - Vector2.UnitX * 5, 1.01f, Color.Black);
+    
     if (StartedDragging && Wire is null)
     {
+      DrawLineBezier(Parent.SmoothedGriddedPosition + StartWireOffset, GetScreenToWorld2D(GetMousePosition(), Globals.Camera), 4, Color.DarkPurple);
       DrawLineBezier(Parent.SmoothedGriddedPosition + StartWireOffset, GetScreenToWorld2D(GetMousePosition(), Globals.Camera), 2, Color.RayWhite);
     }
+    
+    if (Parent is not null && Connector?.Parent is not null)
+      Wire!.Render();
+    
     Hitbox.Render();
+  }
+
+  public void RollbackWiresRender()
+  {
+    if (Wire is not null)
+      Wire.Drawed = false;
+  }
+
+  private void PlayInteractionSound()
+  {
+    PlaySound(Globals.InteractionSetSound!.Value);
   }
 }

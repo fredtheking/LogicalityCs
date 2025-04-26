@@ -17,11 +17,9 @@ public class LogicBox : IScript
   public Rectangle DragRectOffset;
   public Vector2 CenterOffset;
   public Vector2 TextOffset;
-
-  public Receiver? Input1;
-  public Receiver? Input2;
-  public Receiver? Output;
   
+  public Receiver?[] Receivers = new Receiver[3];
+
   public bool AllowDrawBorder { get; private set; }
   public bool Destroy { get; private set; }
   public bool Inactive { get; init; }
@@ -70,24 +68,24 @@ public class LogicBox : IScript
     if (State is not LogicStates.Battery)
     {
       Vector2 offset = new(30, CenterOffset.Y + 41);
-      Input1 = new Receiver(this, offset, offset - Vector2.UnitX * 30, false);
+      Receivers[0] = new Receiver(this, offset, offset - Vector2.UnitX * 30, false);
     }
     if (State is LogicStates.And or LogicStates.Or or LogicStates.Xor)
     {
-      Input1!.Offset.Y -= 7;
-      Input1!.StartWireOffset.Y -= 7;
-      Input1!.Hitbox.Rect.Y -= 7;
+      Receivers[0]!.Offset.Y -= 7;
+      Receivers[0]!.StartWireOffset.Y -= 7;
+      Receivers[0]!.Hitbox.Rect.Y -= 7;
       Vector2 offset = new(30, CenterOffset.Y + 48);
-      Input2 = new Receiver(this, offset, offset - Vector2.UnitX * 30, false);
+      Receivers[1] = new Receiver(this, offset, offset - Vector2.UnitX * 30, false);
     }
     if (State is not LogicStates.Receive)
     {
       Vector2 offset = new(RealRect.Width - 30, CenterOffset.Y + 41);
-      Output = new Receiver(this, offset, offset + Vector2.UnitX * 30, true);
+      Receivers[2] = new Receiver(this, offset, offset + Vector2.UnitX * 30, true);
     }
 
-    if (Input1 is not null && State is LogicStates.Wire or LogicStates.Not or LogicStates.Receive)
-      Input1.Offset.Y = Output?.Offset.Y ?? CenterOffset.Y + 41;
+    if (Receivers[0] is not null && State is LogicStates.Wire or LogicStates.Not or LogicStates.Receive)
+      Receivers[0]!.Offset.Y = Receivers[2]?.Offset.Y ?? CenterOffset.Y + 41;
   }
 
   public static bool Create(LogicBox box)
@@ -95,9 +93,7 @@ public class LogicBox : IScript
     if (!box.Destroy)
     {
       box.Init();
-      if (box.Input1 != null) Receiver.Receivers.Add(box.Input1);
-      if (box.Input2 != null) Receiver.Receivers.Add(box.Input2);
-      if (box.Output != null) Receiver.Receivers.Add(box.Output);
+      //Receiver.Receivers.Concat(box.Receivers).Where(p => p is not null).ToList();
       Boxes.Add(box);
       Occipied.Add(box, box.GriddedPosition);
       return true;
@@ -115,22 +111,25 @@ public class LogicBox : IScript
   {
     SmoothedGriddedPosition = GriddedPosition - GetMouseDelta();
     Hitbox?.Init(); DeletionHitbox?.Init();
-    Input1?.Init(); Input2?.Init(); Output?.Init();
+    foreach (Receiver receiver in Receivers)
+      receiver?.Init();
     if (State is LogicStates.Battery)
-      Output!.State = true;
+      Receivers[2]!.State = true;
     GridEtc();
   }
 
   public void Enter()
   {
     Hitbox?.Enter(); DeletionHitbox?.Enter();
-    Input1?.Enter(); Input2?.Enter(); Output?.Enter();
+    foreach (Receiver receiver in Receivers)
+      receiver?.Enter();
   }
   
   public void Leave()
   {
     Hitbox?.Leave(); DeletionHitbox?.Leave();
-    Input1?.Leave(); Input2?.Leave(); Output?.Leave();
+    foreach (Receiver receiver in Receivers)
+      receiver?.Leave();
 
     Destroy = true;
     DestroyCheck();
@@ -139,11 +138,13 @@ public class LogicBox : IScript
   private bool DestroyCheck()
   {
     if (!Destroy) return false;
-    if (Input1 != null) Receiver.Receivers.Remove(Input1);
-    if (Input2 != null) Receiver.Receivers.Remove(Input2);
-    if (Output != null) Receiver.Receivers.Remove(Output);
+    //if (Input1 != null) Receiver.Receivers.Remove(Input1);
+    //if (Input2 != null) Receiver.Receivers.Remove(Input2);
+    //if (Output != null) Receiver.Receivers.Remove(Output);
     Occipied.Remove(this);
     Boxes.Remove(this);
+    foreach (Receiver receiver in Receivers.Where(x => x is not null))
+      receiver!.Parent = null;
     return true;
   }
 
@@ -154,40 +155,43 @@ public class LogicBox : IScript
     
     Occipied[this] = GriddedPosition;
     Hitbox?.Update(); DeletionHitbox?.Update();
-    Input1?.Update(); Input2?.Update(); Output?.Update();
+    foreach (Receiver receiver in Receivers)
+      receiver?.Update();
     
     if (!Inactive)
     {
-      // Deletion
-      if (DeletionHitbox!.Press[(int)MouseButton.Right])
-      {
-        Destroy = true;
-        return;
-      }
-      
-      // Selection
       Selected = Hitbox!.Drag[(int)MouseButton.Left];
-      if (Selected)
-      {
-        RealRect.Position += GetMouseDelta() / Globals.Camera.Zoom;
 
-        if (!GridsIntersects(Occipied))
-        {
-          AllowDrawBorder = false;
-          GridPosition();
-          GridEtc();
-        }
-        else
-        {
-          AllowDrawBorder = true;
-        }
-      }
-      else
+      switch (Selected)
       {
-        AllowDrawBorder = false;
-        RealRect.Position = GriddedPosition;
+        // Deletion
+        case false when DeletionHitbox!.Press[(int)MouseButton.Right]:
+          Destroy = true;
+          return;
+        // Selection
+        case true:
+        {
+          RealRect.Position += GetMouseDelta() / Globals.Camera.Zoom;
+
+          if (!GridsIntersects(Occipied))
+          {
+            AllowDrawBorder = false;
+            GridPosition();
+            GridEtc();
+          }
+          else
+          {
+            AllowDrawBorder = true;
+          }
+
+          break;
+        }
+        default:
+          AllowDrawBorder = false;
+          RealRect.Position = GriddedPosition;
+          break;
       }
-      
+
       // Wires
       if (StartedDragging > 0 || Selected)
       {
@@ -215,29 +219,12 @@ public class LogicBox : IScript
     else
       DrawRectangleLinesEx(selectionRect, 1, Color.Black);
     
-    if (Input1 is not null)
-    {
-      if (Input1.State) DrawCircleGradient((int)(SmoothedGriddedPosition.X + Input1.Offset.X), (int)(SmoothedGriddedPosition.Y + Input1.Offset.Y), 7, Color.DarkGreen, new Color(255, 255, 255, 36));
-      DrawCircleV(SmoothedGriddedPosition + Input1.Offset, 5, Input1.State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
-      DrawRectangleRoundedLinesEx(new Rectangle(SmoothedGriddedPosition + Input1.Offset - Vector2.One * 5, 10, 10), 1, 10, 1.01f, Color.Black);
-      DrawLineEx(SmoothedGriddedPosition + Input1.Offset - Vector2.UnitX * 30, SmoothedGriddedPosition + Input1.Offset - Vector2.UnitX * 5, 1.01f, Color.Black);
-    }
-    if (Input2 is not null)
-    {
-      if (Input2.State) DrawCircleGradient((int)(SmoothedGriddedPosition.X + Input2.Offset.X), (int)(SmoothedGriddedPosition.Y + Input2.Offset.Y), 7, Color.DarkGreen, new Color(255, 255, 255, 36));
-      DrawCircleV(SmoothedGriddedPosition + Input2.Offset, 5, Input2.State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
-      DrawRectangleRoundedLinesEx(new Rectangle(SmoothedGriddedPosition + Input2.Offset - Vector2.One * 5, 10, 10), 1, 10, 1.01f, Color.Black);
-      DrawLineEx(SmoothedGriddedPosition + Input2.Offset - Vector2.UnitX * 30, SmoothedGriddedPosition + Input2.Offset - Vector2.UnitX * 5, 1.01f, Color.Black);
-    }
-    if (Output is not null)
-    {
-      if (Output.State) DrawCircleGradient((int)(SmoothedGriddedPosition.X + Output.Offset.X), (int)(SmoothedGriddedPosition.Y + Output.Offset.Y), 7, Color.DarkGreen, new Color(255, 255, 255, 36));
-      DrawCircleV(SmoothedGriddedPosition + Output.Offset, 5, Output.State ? new Color(230, 230, 230, 255) : new Color(0, 0, 0, 100));
-      DrawRectangleRoundedLinesEx(new Rectangle(SmoothedGriddedPosition + Output.Offset - Vector2.One * 5, 10, 10), 1, 10, 1.01f, Color.Black);
-      DrawLineEx(SmoothedGriddedPosition + Output.Offset + Vector2.UnitX * 30, SmoothedGriddedPosition + Output.Offset + Vector2.UnitX * 5, 1.01f, Color.Black);
-    }
-    
     DrawTextEx(GetFontDefault(), State.ToString().ToUpper(), SmoothedGriddedPosition + TextOffset, 18, 1, Color.Black);
+    
+    foreach (Receiver receiver in Receivers)
+      receiver?.Render();
+    foreach (Receiver receiver in Receivers)
+      receiver?.RollbackWiresRender();
     
     if (AllowDrawBorder)
     {
@@ -246,7 +233,6 @@ public class LogicBox : IScript
     }
     
     DeletionHitbox?.Render(); Hitbox?.Render();
-    Input1?.Render(); Input2?.Render(); Output?.Render();
   }
 
   private void GridEtc()
@@ -256,9 +242,9 @@ public class LogicBox : IScript
       DeletionHitbox!.Rect.Position = GriddedPosition;
       Hitbox!.Rect.Position = GriddedPosition + DragRectOffset.Position;
     }
-    if (Input1 is not null) Input1.Hitbox.Rect.Position = GriddedPosition + Input1.Offset - Vector2.One * 5;
-    if (Input2 is not null) Input2.Hitbox.Rect.Position = GriddedPosition + Input2.Offset - Vector2.One * 5;
-    if (Output is not null) Output.Hitbox.Rect.Position = GriddedPosition + Output.Offset - Vector2.One * 5;
+    foreach (Receiver receiver in Receivers)
+      if (receiver is not null)
+        receiver.Hitbox.Rect.Position = GriddedPosition + receiver.Offset - Vector2.One * 5;
   }
 
   private void GridPosition()

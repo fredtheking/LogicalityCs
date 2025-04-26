@@ -10,17 +10,17 @@ public static class MusicUtils
     if (Globals.CurrentGameMusic is not null)
     {
       StopMusicStream(Globals.CurrentGameMusic.Value);
-      UnloadMusicStream(Globals.CurrentGameMusic.Value);
+      Unload();
     }
 
-    int CurrentId;
+    int currentId;
     do
     {
-      CurrentId = GetRandomValue(1, 5);
-    } while (LastPlayedMusic == CurrentId);
-    LastPlayedMusic = CurrentId;
+      currentId = GetRandomValue(1, 5);
+    } while (LastPlayedMusic == currentId);
+    LastPlayedMusic = currentId;
     
-    Globals.CurrentGameMusic = LoadMusicStream($"assets/music/game/{CurrentId}.ogg");
+    Globals.CurrentGameMusic = LoadMusicStream($"assets/music/game/{currentId}.ogg");
     PlayMusicStream(Globals.CurrentGameMusic.Value);
   }
 
@@ -28,5 +28,10 @@ public static class MusicUtils
   {
     if (Globals.CurrentGameMusic is null || !IsMusicStreamPlaying(Globals.CurrentGameMusic.Value)) RollNew();
     if (Globals.CurrentGameMusic is not null) UpdateMusicStream(Globals.CurrentGameMusic.Value);
+  }
+
+  public static void Unload()
+  {
+    UnloadMusicStream(Globals.CurrentGameMusic!.Value);
   }
 }
