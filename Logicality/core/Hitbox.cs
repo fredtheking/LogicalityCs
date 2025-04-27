@@ -29,8 +29,7 @@ public class Hitbox : IScript
 
   public void Update()
   {
-    
-    Hover = CheckCollisionPointRec(OverlayHitbox ? GetMousePosition() : GetScreenToWorld2D(GetMousePosition(), Globals.Camera), Rect);
+    Hover = HoverHandle();
     for (int i = 0; i < 3; i++)
     {
       Click[i] = IsMouseButtonPressed((MouseButton)i);
@@ -42,14 +41,18 @@ public class Hitbox : IScript
     }
   }
 
-  public void Render()
+  public virtual bool HoverHandle()
+  {
+    return CheckCollisionPointRec(OverlayHitbox ? GetMousePosition() : GetScreenToWorld2D(GetMousePosition(), Globals.Camera), Rect);
+  }
+
+  public virtual void Render()
   {
     if (Globals.Debug)
       DrawRectangleRec(Rect, Color);
   }
   
-  
-  private bool CalcDrag(int i){
+  protected bool CalcDrag(int i){
     if (!Drag[i] && Press[i]) return true;
     if (Drag[i] && !Down[i]) return false;
     return Drag[i];

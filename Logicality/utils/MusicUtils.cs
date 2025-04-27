@@ -3,7 +3,7 @@ namespace Logicality.utils;
 
 public static class MusicUtils
 {
-  private static int LastPlayedMusic = 0;
+  private static int LastPlayedMusic;
   
   public static void RollNew()
   {

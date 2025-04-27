@@ -37,7 +37,7 @@ public class LogicBox : IScript
     RealRect = new Rectangle(position, 120, 100);
     GridPosition();
 
-    if (GridsIntersects(Occipied))
+    if (GridsIntersects(Occipied) || WireLine.Wires.Any(x => x.Hitbox.Hover))
     {
       Destroy = true;
       return;
@@ -59,7 +59,7 @@ public class LogicBox : IScript
     
     CenterOffset = RealRect.Size / 2 - Vector2.UnitY * 14;
     TextOffset = CenterText();
-    DragButton = new Button(this, CenterOffset - new Vector2(50, 20), new Vector2(100, 40), !Inactive);
+    DragButton = new Button(this, CenterOffset - new Vector2(50, 20), new Vector2(100, 40), Inactive);
     if (!Inactive)
     {
       DeletionHitbox = new Hitbox(new Rectangle(GriddedPosition, RealRect.Size)) 
@@ -154,7 +154,9 @@ public class LogicBox : IScript
     if (DestroyCheck()) return;
     
     Occipied[this] = GriddedPosition;
-    DragButton.Update(); SwitchButton?.Update(); DeletionHitbox?.Update();
+    DragButton.Update(); 
+    SwitchButton?.Update(); 
+    DeletionHitbox?.Update();
     foreach (Receiver receiver in Receivers)
       receiver?.Update();
 
@@ -191,6 +193,12 @@ public class LogicBox : IScript
       case true:
       {
         RealRect.Position += GetMouseDelta() / Globals.Camera.Zoom;
+
+        foreach (Receiver receiver in Receivers)
+        {
+          if (receiver?.Wire is not null)
+            receiver.Wire!.UpdateBezierEaseCubicInOutPoints(6);
+        }
 
         if (!GridsIntersects(Occipied))
         {
@@ -235,7 +243,7 @@ public class LogicBox : IScript
     foreach (Receiver receiver in Receivers)
       receiver?.Render();
     foreach (Receiver receiver in Receivers)
-      receiver?.RollbackWiresRender();
+      receiver?.RollbackWires();
     
     if (AllowDrawBorder)
     {
@@ -285,11 +293,11 @@ public class LogicBox : IScript
     switch (SwitchState)
     {
       case true:
-        SwitchButton.BgColor = Color.Green;
+        SwitchButton!.BgColor = Color.Green;
         SwitchButton.SelectBgColor = new Color(0, 174, 22, 255);
         break;
       case false:
-        SwitchButton.BgColor = new Color(190, 0, 0, 255);
+        SwitchButton!.BgColor = new Color(190, 0, 0, 255);
         SwitchButton.SelectBgColor = new Color(160, 0, 0, 255);
         break;
     }

@@ -34,11 +34,13 @@ public class Receiver : IScript
   public void Enter()
   {
     Hitbox.Enter();
+    Wire?.Enter();
   }
   
   public void Leave()
   {
     Hitbox.Leave();
+    Wire?.Leave();
   }
 
   public void Update()
@@ -67,8 +69,9 @@ public class Receiver : IScript
           Connector = receiver;
           receiver.Connector = this;
           Wire = receiver.Wire = new WireLine(IsOutput ? this : receiver, IsOutput ? receiver : this);
+          Wire?.Init();
           ConnectionEstablishedTrigger?.Invoke();
-          
+
           break;
         }
       }
@@ -100,7 +103,6 @@ public class Receiver : IScript
     
     if (StartedDragging && Wire is null)
     {
-      Console.WriteLine(Random.Shared.Next());
       DrawLineBezier(Parent.SmoothedGriddedPosition + StartWireOffset, GetScreenToWorld2D(GetMousePosition(), Globals.Camera), 4, new Color(0, 0, 0, 100));
       DrawLineBezier(Parent.SmoothedGriddedPosition + StartWireOffset, GetScreenToWorld2D(GetMousePosition(), Globals.Camera), 2, new Color(245, 245, 245, 100));
     }
@@ -114,10 +116,11 @@ public class Receiver : IScript
     Hitbox.Render();
   }
 
-  public void RollbackWiresRender()
+  public void RollbackWires()
   {
-    if (Wire is not null)
-      Wire.Drawed = false;
+    if (Wire is null) return;
+    Wire.Updated = false;
+    Wire.Drawed = false;
   }
 
   private void PlayInteractionSound()
