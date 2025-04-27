@@ -103,7 +103,7 @@ public class MainScene : Scene
     DrawSceneGrid();
     foreach (LogicBox box in FinalBoxes)
       box.Render();
-    DrawText("Greetings, User. Welcome to 'Logicality'!\nBuild your own logical processes with tools provided on top\n\nPress '-' and '+' to change volume\nF4 to change music, F3/~ to toggle debug\nMouse gestures to move (MMB) and zoom (Scroll)\nSelector/numbers (from 1 to 7) to change logic box type\nConnect logic boxes with wires using LMB and dragging it from one port to another\n\n(Create your first box with RMB)", 80, -300, 24, Color.RayWhite);
+    DrawText($"Greetings, User. Welcome to 'Logicality'!\nBuild your own logical processes with tools provided on top\n\nPress '-' and '+' to change volume\nF4 to change music{(Globals.Debug ? ", F3/~ to toggle debug" : "")}\nMouse gestures to move (MMB) and zoom (Scroll)\nSelector/numbers (from 1 to 7) to change logic box type\nConnect logic boxes with wires using LMB and dragging it from one port to another\n\n(Create your first box with RMB. You can also delete it with the same RMB!)", 80, -300, 24, Color.RayWhite);
   }
 
   private void DrawSceneGrid()

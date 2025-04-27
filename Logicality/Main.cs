@@ -6,6 +6,9 @@ using Raylib_cs;
 using Steamworks;
 
 // PRE-INITIALISATION
+#if RELEASE
+Globals.Debug = false;
+#endif
 try
 {
   Console.WriteLine(SteamAPI.Init() ? "Steam API initialised successfully!" : "Steam API not initialised.");
@@ -46,14 +49,16 @@ while (!WindowShouldClose())
   if (Globals.Volume > 0) 
     MusicUtils.Update();
   FpsProcess();
-  if (IsKeyPressed(KeyboardKey.F3) || IsKeyPressed(KeyboardKey.Grave))
-    Globals.Debug = !Globals.Debug;
   if (IsKeyPressed(KeyboardKey.F4))
     MusicUtils.RollNew();
+  #if DEBUG
+  if (IsKeyPressed(KeyboardKey.F3) || IsKeyPressed(KeyboardKey.Grave))
+    Globals.Debug = !Globals.Debug;
   if (IsKeyPressed(KeyboardKey.F1))
     sceneManager.Previous();
   else if (IsKeyPressed(KeyboardKey.F2))
     sceneManager.Next();
+  #endif
   
   
   
