@@ -32,8 +32,6 @@ public class MainScene : Scene
         };
     };
     
-    LogicBox.Create(new LogicBox(LogicStates.Switch, new Vector2(400, 300), true));
-    
     Selector.Init();
     foreach (LogicBox box in LogicBox.Boxes)
       box.Init();
@@ -42,7 +40,7 @@ public class MainScene : Scene
   public override void Enter()
   {
     Globals.Camera.Offset = Globals.Resolution / 2;
-    Globals.Camera.Target = Globals.MapSize / 2;
+    Globals.Camera.Target = new Vector2(Globals.MapSize.X / 2, 10);
     Globals.Camera.Rotation = 0;
     Globals.Camera.Zoom = 1;
     CameraZoom = 1;
@@ -105,6 +103,7 @@ public class MainScene : Scene
     DrawSceneGrid();
     foreach (LogicBox box in FinalBoxes)
       box.Render();
+    DrawText("Greetings, User. Welcome to 'Logicality'!\nBuild your own logical processes with tools provided on top\n\nPress '-' and '+' to change volume\nF4 to change music, F3/~ to toggle debug\nMouse gestures to move (MMB) and zoom (Scroll)\nSelector/numbers (from 1 to 7) to change logic box type\nConnect logic boxes with wires using LMB and dragging it from one port to another\n\n(Create your first box with RMB)", 80, -300, 24, Color.RayWhite);
   }
 
   private void DrawSceneGrid()
