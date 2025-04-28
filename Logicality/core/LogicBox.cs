@@ -232,6 +232,10 @@ public class LogicBox : IScript
   public void Render()
   {
     Rectangle griddedRectangle = new Rectangle(SmoothedGriddedPosition, RealRect.Size);
+
+    if (!CheckCollisionRecs(new Rectangle(GetScreenToWorld2D(Vector2.Zero, Globals.Camera), Globals.Resolution / Globals.Camera.Zoom), griddedRectangle))
+      return;
+    
     DrawRectangleRec(griddedRectangle, Color);
     if (Inactive) DrawRectangleLinesEx(new Rectangle(griddedRectangle.Position - Vector2.One * 1, griddedRectangle.Size + Vector2.One * 2), 2, Color.Yellow);
     DrawRectangleLinesEx(griddedRectangle, 1, Color.Black);

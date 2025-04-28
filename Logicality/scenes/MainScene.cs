@@ -18,6 +18,7 @@ public class MainScene : Scene
   public Sound? PlaceSound;
   public Sound? DisappearSound;
   public float CameraZoom = 1;
+  public string UserText = null!;
   
   public override void Init()
   {
@@ -36,6 +37,12 @@ public class MainScene : Scene
     foreach (LogicBox box in LogicBox.Boxes)
       box.Init();
     Overlay += () => Selector.Render();
+    
+    #if DEBUG
+      UserText = "Greetings, User. Welcome to 'Logicality'!\nBuild your own logical processes with tools provided on top\n\nPress '-' and '+' to change volume\nF4 to change music, F3/~ to toggle debug\nMouse gestures to move (MMB) and zoom (Scroll)\nSelector/numbers (from 1 to 7) to change logic box type\nConnect logic boxes with wires using LMB and dragging it from one port to another\n\n(Create your first box with RMB. You can also delete it with the same RMB!)";
+    #else
+      UserText = "Greetings, User. Welcome to 'Logicality'!\nBuild your own logical processes with tools provided on top\n\nPress '-' and '+' to change volume\nF4 to change music\nMouse gestures to move (MMB) and zoom (Scroll)\nSelector/numbers (from 1 to 7) to change logic box type\nConnect logic boxes with wires using LMB and dragging it from one port to another\n\n(Create your first box with RMB. You can also delete it with the same RMB!)";
+    #endif
   }
   public override void Enter()
   {
@@ -103,7 +110,7 @@ public class MainScene : Scene
     DrawSceneGrid();
     foreach (LogicBox box in FinalBoxes)
       box.Render();
-    DrawText($"Greetings, User. Welcome to 'Logicality'!\nBuild your own logical processes with tools provided on top\n\nPress '-' and '+' to change volume\nF4 to change music{(Globals.Debug ? ", F3/~ to toggle debug" : "")}\nMouse gestures to move (MMB) and zoom (Scroll)\nSelector/numbers (from 1 to 7) to change logic box type\nConnect logic boxes with wires using LMB and dragging it from one port to another\n\n(Create your first box with RMB. You can also delete it with the same RMB!)", 80, -300, 24, Color.RayWhite);
+    DrawText(UserText, 80, -300, 24, Color.RayWhite);
   }
 
   private void DrawSceneGrid()
