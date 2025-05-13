@@ -7,7 +7,7 @@ namespace Logicality.core;
 
 public class BezierHitbox : Hitbox
 {
-  public Vector2[] Points;
+  public Vector2[] Points = null!;
   public Vector2 Start;
   public Vector2 End;
 
@@ -34,7 +34,6 @@ public class BezierHitbox : Hitbox
     }
 
     bool verdict = hover.Any(x => x);
-    Globals.MouseOnBezier += verdict ? 1 : 0;
     return verdict;
   }
 

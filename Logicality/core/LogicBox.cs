@@ -1,5 +1,4 @@
 using System.Numerics;
-using Logicality.scenes;
 using Logicality.utils;
 using Logicality.utils.interfaces;
 using Raylib_cs;
@@ -18,7 +17,7 @@ public class LogicBox : IScript
   public Vector2 TextOffset;
 
   public static event Action<LogicBox>? AdditionalInit;
-  public Button DragButton { get; init; }
+  public Button DragButton { get; } = null!;
   public Button? SwitchButton { get; init; }
   public bool SwitchState { get; private set; } = true;
   
@@ -113,7 +112,7 @@ public class LogicBox : IScript
   {
     SmoothedGriddedPosition = GriddedPosition - GetMouseDelta();
     DragButton.Init(); SwitchButton?.Init(); DeletionHitbox?.Init();
-    foreach (Receiver receiver in Receivers)
+    foreach (Receiver? receiver in Receivers)
       receiver?.Init();
     if (State is LogicStates.Battery)
       Receivers[2]!.State = true;
@@ -124,14 +123,14 @@ public class LogicBox : IScript
   public void Enter()
   {
     DragButton.Enter(); SwitchButton?.Enter(); DeletionHitbox?.Enter();
-    foreach (Receiver receiver in Receivers)
+    foreach (Receiver? receiver in Receivers)
       receiver?.Enter();
   }
   
   public void Leave()
   {
     DragButton.Leave(); SwitchButton?.Leave(); DeletionHitbox?.Leave();
-    foreach (Receiver receiver in Receivers)
+    foreach (Receiver? receiver in Receivers)
       receiver?.Leave();
 
     Destroy = true;
@@ -143,7 +142,7 @@ public class LogicBox : IScript
     if (!Destroy) return false;
     Occipied.Remove(this);
     Boxes.Remove(this);
-    foreach (Receiver receiver in Receivers.Where(x => x is not null))
+    foreach (Receiver? receiver in Receivers.Where(x => x is not null))
       receiver!.Parent = null;
     return true;
   }
@@ -157,7 +156,7 @@ public class LogicBox : IScript
     DragButton.Update(); 
     SwitchButton?.Update(); 
     DeletionHitbox?.Update();
-    foreach (Receiver receiver in Receivers)
+    foreach (Receiver? receiver in Receivers)
       receiver?.Update();
 
     if (Receivers[2] is not null)
@@ -194,7 +193,7 @@ public class LogicBox : IScript
       {
         RealRect.Position += GetMouseDelta() / Globals.Camera.Zoom;
 
-        foreach (Receiver receiver in Receivers)
+        foreach (Receiver? receiver in Receivers)
         {
           if (receiver?.Wire is not null)
             receiver.Wire!.UpdateBezierEaseCubicInOutPoints(6);
@@ -244,9 +243,9 @@ public class LogicBox : IScript
     
     DrawTextEx(GetFontDefault(), State.ToString().ToUpper(), SmoothedGriddedPosition + TextOffset, 18, 1, Color.Black);
     
-    foreach (Receiver receiver in Receivers)
+    foreach (Receiver? receiver in Receivers)
       receiver?.Render();
-    foreach (Receiver receiver in Receivers)
+    foreach (Receiver? receiver in Receivers)
       receiver?.RollbackWires();
     
     if (AllowDrawBorder)
@@ -265,7 +264,7 @@ public class LogicBox : IScript
       if (SwitchButton is not null)
         SwitchButton.Hitbox!.Rect.Position = GriddedPosition + SwitchButton.Offset;
     }
-    foreach (Receiver receiver in Receivers)
+    foreach (Receiver? receiver in Receivers)
       if (receiver is not null)
         receiver.Hitbox.Rect.Position = GriddedPosition + receiver.Offset - Vector2.One * 5;
   }

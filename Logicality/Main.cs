@@ -20,8 +20,6 @@ catch (Exception ex)
 SceneManager sceneManager = new();
 sceneManager.Add(new MainScene(), new MenuScene());
 sceneManager.Change(nameof(MainScene));
-float elapsedTime = 0f;
-int framesCounter = 0;
 
 // WINDOW SETUP
 SetConfigFlags(ConfigFlags.AlwaysRunWindow | ConfigFlags.HighDpiWindow);
@@ -44,11 +42,9 @@ while (!WindowShouldClose())
   // UPDATE
   sceneManager.Current.Update();
   // GLOBAL-UPDATE
-  Globals.MouseOnBezier = 0;
   VolumeUtils.Update();
   if (Globals.Volume > 0) 
     MusicUtils.Update();
-  FpsProcess();
   if (IsKeyPressed(KeyboardKey.F4))
     MusicUtils.RollNew();
   #if DEBUG
@@ -74,7 +70,7 @@ while (!WindowShouldClose())
   EndMode2D();
   sceneManager.Current.Overlay?.Invoke();
   VolumeUtils.Render();
-  DrawText($"FPS: {Globals.FPS}", 10, 10, 20, Color.Green);
+  DrawText($"FPS: {GetFPS()}", 10, 10, 20, Color.Green);
   DrawText(sceneManager.Current.Name, 10, 30, 20, Color.White);
   EndDrawing();
   
@@ -88,16 +84,3 @@ UnloadSound(Globals.InteractionSetSound.Value);
 SteamAPI.Shutdown();
 CloseAudioDevice();
 CloseWindow();
-
-void FpsProcess()
-{
-  elapsedTime += GetFrameTime();
-  framesCounter++;
-
-  if (elapsedTime >= 0.5f)
-  {
-    Globals.FPS = framesCounter;
-    framesCounter = 0;
-    elapsedTime = 0f;
-  }
-}

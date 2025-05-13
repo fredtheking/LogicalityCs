@@ -32,6 +32,8 @@ public class MainScene : Scene
           receiver.Wire!.DestroyTrigger += () => PlaySound(UnplugSound!.Value);
         };
     };
+
+    LogicBox.Create(new LogicBox(LogicStates.And, Vector2.One * 200, true));
     
     Selector.Init();
     foreach (LogicBox box in LogicBox.Boxes)
