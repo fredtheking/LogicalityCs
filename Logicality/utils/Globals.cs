@@ -6,8 +6,8 @@ namespace Logicality.utils;
 public static class Globals
 {
   public static bool Debug = true;
-  public static Vector2 Resolution = new (1920, 1080);
-  public static Vector2 MapSize = new (1400);
+  public static readonly Vector2 Resolution = new (1920, 1080);
+  public static readonly Vector2 MapSize = new (1400);
   public static Camera2D Camera = new();
   public static Sound? InteractionSetSound = null!;
   
